@@ -13,7 +13,7 @@ import data from "./data.js";
     <div class="@container/main flex flex-1 flex-col gap-2">
         <div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <SectionCards />
-            <div class="flex gap-4 md:gap-6 px-4 lg:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 px-4 lg:px-6">
                 <PieChart />
                 <div class="flex-grow">
                     <TransactionTable />

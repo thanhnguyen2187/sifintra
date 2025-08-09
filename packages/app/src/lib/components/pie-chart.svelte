@@ -1,6 +1,7 @@
 <script lang="ts">
 import TrendingUpIcon from "@lucide/svelte/icons/trending-up";
 import { Arc, PieChart, Text } from "layerchart";
+import { Button } from "$lib/components/ui/button/index.js";
 import * as Card from "$lib/components/ui/card/index.js";
 import * as Chart from "$lib/components/ui/chart/index.js";
 
@@ -35,10 +36,10 @@ const chartConfig = {
                 cRange={chartData.map((d) => d.color)}
                 c="color"
                 props={{
-          pie: {
-            motion: "tween",
-          },
-        }}
+                  pie: {
+                    motion: "tween",
+                  },
+                }}
             >
                 {#snippet tooltip()}
                     <Chart.Tooltip hideLabel />
@@ -61,10 +62,7 @@ const chartConfig = {
     </Card.Content>
     <Card.Footer class="flex-col gap-2 text-sm">
         <div class="flex items-center gap-2 font-medium leading-none">
-            Trending up by 5.2% this month <TrendingUpIcon class="size-4" />
-        </div>
-        <div class="text-muted-foreground leading-none">
-            Showing total visitors for the last 6 months
+            <Button>Add</Button>
         </div>
     </Card.Footer>
 </Card.Root>
