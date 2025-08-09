@@ -1,0 +1,11 @@
+tasks:
+  install:
+    command: 'cargo build'
+
+  build:
+    command: 'cargo build --release'
+    deps:
+      - 'frontend:build'
+
+  serve:
+    command: 'cargo run'
