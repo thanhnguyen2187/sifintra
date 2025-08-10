@@ -71,7 +71,7 @@ const chartConfig = {
                     <Table.Row>
                         <Table.Head>Name</Table.Head>
                         <Table.Head>Amount</Table.Head>
-                        <Table.Head>Actions</Table.Head>
+                        <Table.Head class="text-right">Actions</Table.Head>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -79,7 +79,7 @@ const chartConfig = {
                         <Table.Row>
                             <Table.Cell>{item.browser}</Table.Cell>
                             <Table.Cell>{item.visitors}</Table.Cell>
-                            <Table.Cell>
+                            <Table.Cell class="text-right">
                                 <Button variant="secondary" size="icon">
                                     <EditIcon />
                                 </Button>
