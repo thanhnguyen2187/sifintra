@@ -30,7 +30,9 @@
 		"@tailwindcss/typography": "^0.5.15",
 		"@tailwindcss/vite": "^4.0.0",
 		"@tanstack/table-core": "^8.21.3",
+		"@types/d3-interpolate": "^3.0.4",
 		"@types/d3-scale": "^4.0.9",
+		"@types/d3-scale-chromatic": "^3.1.0",
 		"@types/d3-shape": "^3.1.7",
 		"bits-ui": "^2.9.2",
 		"clsx": "^2.1.1",
@@ -51,7 +53,9 @@
 		"zod": "^3.25.76"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "^2.0.0"
+		"@inlang/paraglide-js": "^2.0.0",
+		"d3-interpolate": "^3.0.1",
+		"d3-scale-chromatic": "^3.1.0"
 	},
 	"packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
 }

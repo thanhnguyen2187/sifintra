@@ -1,12 +1,14 @@
 <script lang="ts">
 import { EditIcon, PlusIcon, TrashIcon } from "@lucide/svelte";
+import { quantize } from "d3-interpolate";
+import { interpolateRainbow } from "d3-scale-chromatic";
 import { Arc, PieChart, Text } from "layerchart";
-import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+import { Button } from "$lib/components/ui/button/index.js";
 import * as Card from "$lib/components/ui/card/index.js";
 import * as Chart from "$lib/components/ui/chart/index.js";
-import * as Popover from "$lib/components/ui/popover/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
+
+const records = [{ id: crypto.randomUUID(), name: "John", value: 100 }];
 
 const chartData = [
   { browser: "chrome", visitors: 275, color: "var(--color-chrome)" },
@@ -15,15 +17,6 @@ const chartData = [
   { browser: "edge", visitors: 173, color: "var(--color-edge)" },
   { browser: "other", visitors: 90, color: "var(--color-other)" },
 ];
-
-const chartConfig = {
-  visitors: { label: "Visitors" },
-  chrome: { label: "Chrome", color: "var(--chart-1)" },
-  safari: { label: "Safari", color: "var(--chart-2)" },
-  firefox: { label: "Firefox", color: "var(--chart-3)" },
-  edge: { label: "Edge", color: "var(--chart-4)" },
-  other: { label: "Other", color: "var(--chart-5)" },
-} satisfies Chart.ChartConfig;
 </script>
 
 <Card.Root class="flex flex-col">
@@ -32,20 +25,18 @@ const chartConfig = {
     </Card.Header>
     <Card.Content class="flex-1">
         <Chart.Container
-            config={chartConfig}
             class="mx-auto aspect-square max-h-[250px]"
         >
             <PieChart
                 data={chartData}
                 key="browser"
                 value="visitors"
-                cRange={chartData.map((d) => d.color)}
-                c="color"
                 props={{
                   pie: {
                     motion: "tween",
                   },
                 }}
+                cRange={quantize(interpolateRainbow, chartData.length + 1)}
             >
                 {#snippet tooltip()}
                     <Chart.Tooltip hideLabel />
