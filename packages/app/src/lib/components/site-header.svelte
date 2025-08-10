@@ -5,6 +5,7 @@ import {
   type DateValue,
   getLocalTimeZone,
 } from "@internationalized/date";
+import { GithubIcon } from "@lucide/svelte";
 import CalendarIcon from "@lucide/svelte/icons/calendar";
 import type { DateRange } from "bits-ui";
 import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
@@ -105,6 +106,7 @@ const items = [
                 target="_blank"
                 rel="noopener noreferrer"
             >
+                <GithubIcon />
                 GitHub
             </Button>
 
