@@ -8,14 +8,12 @@ import * as Card from "$lib/components/ui/card/index.js";
 import * as Chart from "$lib/components/ui/chart/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
 
-const records = [{ id: crypto.randomUUID(), name: "John", value: 100 }];
-
 const chartData = [
-  { browser: "chrome", visitors: 275, color: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, color: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, color: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, color: "var(--color-edge)" },
-  { browser: "other", visitors: 90, color: "var(--color-other)" },
+  { id: crypto.randomUUID(), value: 275, name: "Entertainment" },
+  { id: crypto.randomUUID(), value: 200, name: "Food" },
+  { id: crypto.randomUUID(), value: 187, name: "Transportation" },
+  { id: crypto.randomUUID(), value: 173, name: "Shopping" },
+  { id: crypto.randomUUID(), value: 90, name: "Others" },
 ];
 </script>
 
@@ -29,8 +27,8 @@ const chartData = [
         >
             <PieChart
                 data={chartData}
-                key="browser"
-                value="visitors"
+                key="id"
+                value="value"
                 props={{
                   pie: {
                     motion: "tween",
@@ -42,11 +40,11 @@ const chartData = [
                     <Chart.Tooltip hideLabel />
                 {/snippet}
                 {#snippet arc({ props, visibleData, index })}
-                    {@const browser = visibleData[index].browser}
+                    {@const name = visibleData[index].name}
                     <Arc {...props}>
                         {#snippet children({ getArcTextProps })}
                             <Text
-                                value={browser}
+                                value={name}
                                 {...getArcTextProps("centroid")}
                                 font-size="12"
                                 class="fill-background capitalize"
@@ -68,8 +66,8 @@ const chartData = [
                 <Table.Body>
                     {#each chartData as item, index}
                         <Table.Row>
-                            <Table.Cell>{item.browser}</Table.Cell>
-                            <Table.Cell>{item.visitors}</Table.Cell>
+                            <Table.Cell>{item.name}</Table.Cell>
+                            <Table.Cell>{item.value}</Table.Cell>
                             <Table.Cell class="text-right">
                                 <Button variant="secondary" size="icon">
                                     <EditIcon />
