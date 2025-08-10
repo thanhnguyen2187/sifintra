@@ -1,10 +1,11 @@
 <script lang="ts">
-import TrendingUpIcon from "@lucide/svelte/icons/trending-up";
+import { EditIcon } from "@lucide/svelte";
 import { Arc, PieChart, Text } from "layerchart";
 import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-import { Button } from "$lib/components/ui/button/index.js";
+import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
 import * as Card from "$lib/components/ui/card/index.js";
 import * as Chart from "$lib/components/ui/chart/index.js";
+import * as Popover from "$lib/components/ui/popover/index.js";
 
 const chartData = [
   { browser: "chrome", visitors: 275, color: "var(--color-chrome)" },
@@ -24,7 +25,7 @@ const chartConfig = {
 } satisfies Chart.ChartConfig;
 </script>
 
-<AlertDialog.Root>
+<Popover.Root>
     <Card.Root class="flex flex-col">
         <Card.Header class="items-center">
             <Card.Title>Expense by category</Card.Title>
@@ -64,29 +65,23 @@ const chartConfig = {
                     {/snippet}
                 </PieChart>
             </Chart.Container>
+            <div>Add current categories here</div>
         </Card.Content>
         <Card.Footer class="flex-col gap-2 text-sm">
             <div class="flex items-center gap-2 font-medium leading-none">
-                <AlertDialog.Trigger>
-                    <Button>Add Category</Button>
-                </AlertDialog.Trigger>
+                <Popover.Trigger>
+                    <Button variant="secondary">
+                        <EditIcon />
+                        Edit Category
+                    </Button>
+                </Popover.Trigger>
             </div>
         </Card.Footer>
     </Card.Root>
 
-    <AlertDialog.Content
+    <Popover.Content
         interactOutsideBehavior="close"
     >
-        <AlertDialog.Header>
-            <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-            <AlertDialog.Description>
-                This action cannot be undone. This will permanently delete your account
-                and remove your data from our servers.
-            </AlertDialog.Description>
-        </AlertDialog.Header>
-        <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-            <AlertDialog.Action>Continue</AlertDialog.Action>
-        </AlertDialog.Footer>
-    </AlertDialog.Content>
-</AlertDialog.Root>
+        table here
+    </Popover.Content>
+</Popover.Root>
