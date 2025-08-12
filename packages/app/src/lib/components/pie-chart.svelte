@@ -1,11 +1,12 @@
 <script lang="ts">
-import { EditIcon, PlusIcon, TrashIcon } from "@lucide/svelte";
+import { CheckIcon, EditIcon, PlusIcon, TrashIcon } from "@lucide/svelte";
 import { quantize } from "d3-interpolate";
 import { interpolateRainbow } from "d3-scale-chromatic";
 import { Arc, PieChart, Text } from "layerchart";
 import { Button } from "$lib/components/ui/button/index.js";
 import * as Card from "$lib/components/ui/card/index.js";
 import * as Chart from "$lib/components/ui/chart/index.js";
+import { Input } from "$lib/components/ui/input/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
 
 const chartData = [
@@ -23,7 +24,7 @@ const chartData = [
     </Card.Header>
     <Card.Content class="flex-1">
         <Chart.Container
-            class="mx-auto aspect-square max-h-[250px]"
+            class="mx-auto aspect-square"
         >
             <PieChart
                 data={chartData}
@@ -37,7 +38,7 @@ const chartData = [
                 cRange={quantize(interpolateRainbow, chartData.length + 1)}
             >
                 {#snippet tooltip()}
-                    <Chart.Tooltip hideLabel />
+                    <div></div>
                 {/snippet}
                 {#snippet arc({ props, visibleData, index })}
                     {@const name = visibleData[index].name}
@@ -47,7 +48,7 @@ const chartData = [
                                 value={name}
                                 {...getArcTextProps("centroid")}
                                 font-size="12"
-                                class="fill-background capitalize"
+                                class="fill-background"
                             />
                         {/snippet}
                     </Arc>
@@ -64,20 +65,33 @@ const chartData = [
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {#each chartData as item, index}
+                    {#each chartData as item}
                         <Table.Row>
                             <Table.Cell>{item.name}</Table.Cell>
                             <Table.Cell>{item.value}</Table.Cell>
                             <Table.Cell class="text-right">
-                                <Button variant="secondary" size="icon">
+                                <Button variant="outline" size="icon">
                                     <EditIcon />
                                 </Button>
-                                <Button variant="secondary" size="icon">
+                                <Button variant="outline" size="icon">
                                     <TrashIcon />
                                 </Button>
                             </Table.Cell>
                         </Table.Row>
                     {/each}
+                    <Table.Row>
+                        <Table.Cell colspan={2}>
+                            <Input type="text" />
+                        </Table.Cell>
+                        <Table.Cell class="text-right">
+                            <Button variant="outline" size="icon">
+                                <CheckIcon />
+                            </Button>
+                            <Button variant="outline" size="icon">
+                                <TrashIcon />
+                            </Button>
+                        </Table.Cell>
+                    </Table.Row>
                 </Table.Body>
             </Table.Root>
         </div>

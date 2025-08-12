@@ -14,7 +14,8 @@ import data from "./data.js";
         <div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <SectionCards />
             <div
-                class="grid grid-cols-1 md:grid-cols-[24em_1fr] gap-2 md:gap-4 px-4 lg:px-6">
+                class="grid grid-cols-1 md:grid-cols-[1fr_1fr] lg:grid-cols-[24em_1fr] gap-2 md:gap-4 px-4 lg:px-6"
+            >
                 <PieChart />
                 <TransactionTable />
             </div>

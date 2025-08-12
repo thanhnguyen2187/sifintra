@@ -1,9 +1,13 @@
 <script lang="ts">
 import { Badge } from "$lib/components/ui/badge";
+import { Button } from "$lib/components/ui/button/index.js";
 import * as Card from "$lib/components/ui/card/index.js";
+import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 import * as Pagination from "$lib/components/ui/pagination/index.js";
 import * as Select from "$lib/components/ui/select/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
+
+let value: string = $state("");
 
 const invoices = [
   {
@@ -105,45 +109,34 @@ const invoices = [
                             {/if}
                         </Table.Cell>
                         <Table.Cell>
-                            <Select.Root type="single">
-                                <Select.Trigger>Pick</Select.Trigger>
-                                <Select.Content>
-                                    <Select.Item value="">Category 1</Select.Item>
-                                    <Select.Item value="">Category 2</Select.Item>
-                                    <Select.Item value="">Category 3</Select.Item>
-                                </Select.Content>
-                            </Select.Root>
+                            <DropdownMenu.Root>
+                                <DropdownMenu.Trigger>
+                                    {#snippet child({ props })}
+                                        <Button {...props} variant="outline">
+                                            Entertainment
+                                        </Button>
+                                    {/snippet}
+                                </DropdownMenu.Trigger>
+                                <DropdownMenu.Content class="w-56">
+                                    <DropdownMenu.Group>
+                                        <DropdownMenu.Label>Panel Position</DropdownMenu.Label>
+                                        <DropdownMenu.Separator />
+                                        <DropdownMenu.RadioGroup bind:value={value}>
+                                            <DropdownMenu.RadioItem value="top">Top</DropdownMenu.RadioItem>
+                                            <DropdownMenu.RadioItem value="bottom">Bottom</DropdownMenu.RadioItem>
+                                            <DropdownMenu.RadioItem value="right">Right</DropdownMenu.RadioItem>
+                                        </DropdownMenu.RadioGroup>
+                                    </DropdownMenu.Group>
+                                </DropdownMenu.Content>
+                            </DropdownMenu.Root>
                         </Table.Cell>
                     </Table.Row>
                 {/each}
             </Table.Body>
         </Table.Root>
     </Card.Content>
-    <Card.Footer>
-        <Pagination.Root count={100} perPage={10}>
-            {#snippet children({ pages, currentPage })}
-                <Pagination.Content>
-                    <Pagination.Item>
-                        <Pagination.PrevButton />
-                    </Pagination.Item>
-                    {#each pages as page (page.key)}
-                        {#if page.type === "ellipsis"}
-                            <Pagination.Item>
-                                <Pagination.Ellipsis />
-                            </Pagination.Item>
-                        {:else}
-                            <Pagination.Item>
-                                <Pagination.Link {page} isActive={currentPage === page.value}>
-                                    {page.value}
-                                </Pagination.Link>
-                            </Pagination.Item>
-                        {/if}
-                    {/each}
-                    <Pagination.Item>
-                        <Pagination.NextButton />
-                    </Pagination.Item>
-                </Pagination.Content>
-            {/snippet}
-        </Pagination.Root>
+    <Card.Footer class="flex-1 flex-col">
+        <div class="flex-1"></div>
+        <div>Total x items</div>
     </Card.Footer>
 </Card.Root>
