@@ -40,6 +40,11 @@ onMount(() => {
 
 <div class="flex flex-col gap-4">
     <span class="font-bold text-xl">Overview</span>
+    <div class="join">
+        <button class="btn join-item">This week</button>
+        <button class="btn join-item">This month</button>
+        <button class="btn join-item">Last month</button>
+    </div>
     <canvas
         bind:this={pieChart}
         class="max-h-[40em] pt-2"

@@ -125,6 +125,11 @@ const records: Transaction[] = [
 
 <div class="flex flex-col gap-4">
     <span class="font-bold text-xl">Transactions</span>
+    <div class="join">
+        <button class="btn join-item">This week</button>
+        <button class="btn join-item">This month</button>
+        <button class="btn join-item">Last month</button>
+    </div>
     <table class="table">
         <thead>
         <tr>
@@ -153,6 +158,19 @@ const records: Transaction[] = [
             </tr>
         {/each}
         </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="4">
+                <div class="join">
+                    <button class="join-item btn">1</button>
+                    <button class="join-item btn">2</button>
+                    <button class="join-item btn btn-disabled">...</button>
+                    <button class="join-item btn">99</button>
+                    <button class="join-item btn">100</button>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
     </table>
 
     <a class="underline" href="/">Back</a>
