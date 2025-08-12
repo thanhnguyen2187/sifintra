@@ -1,5 +1,6 @@
 <script lang="ts">
 import EditIcon from "virtual:icons/mynaui/edit-solid";
+import PlusIcon from "virtual:icons/mynaui/plus-solid";
 import TrashIcon from "virtual:icons/mynaui/trash-solid";
 
 type Category = {
@@ -65,6 +66,16 @@ const records: Category[] = [
             </tr>
         {/each}
         </tbody>
+        <tfoot>
+        <tr>
+            <td class="text-center" colspan="4">
+                <button class="btn">
+                    <PlusIcon />
+                    Add
+                </button>
+            </td>
+        </tr>
+        </tfoot>
     </table>
 
     <div>
