@@ -7,7 +7,7 @@ use rust_embed::Embed;
 static INDEX_HTML: &str = "index.html";
 
 #[derive(Embed)]
-#[folder = "frontend-build/"]
+#[folder = "app-build/"]
 struct Assets;
 
 pub async fn static_handler(uri: Uri) -> impl IntoResponse {
