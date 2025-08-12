@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+</script>
+
+<div class="flex flex-col gap-4">
+    <span class="font-bold text-xl">Links</span>
+    <ul>
+        <li><a class="underline" href="/overview">Overview</a></li>
+        <li><a class="underline" href="/transactions">Transactions</a></li>
+        <li><a class="underline" href="/categories">Categories</a></li>
+    </ul>
+</div>
