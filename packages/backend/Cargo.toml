@@ -8,3 +8,6 @@ axum = "0.8.4"
 rust-embed = "8.7.2"
 tokio = { version = "1.45.1", features = ["full"] }
 mime_guess = "2.0.5"
+snafu = "0.8.6"
+diesel = "2.2.12"
+diesel_migrations = { version = "2.2.0", features = ["sqlite"] }

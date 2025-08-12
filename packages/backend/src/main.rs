@@ -1,4 +1,5 @@
 mod frontend;
+mod err;
 
 use axum::{Router, routing::get};
 
