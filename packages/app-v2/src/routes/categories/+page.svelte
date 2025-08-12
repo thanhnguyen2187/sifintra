@@ -38,7 +38,7 @@ const records: Category[] = [
 </script>
 
 <div class="flex flex-col gap-4">
-    <span class="font-bold text-xl">Transactions</span>
+    <span class="font-bold text-xl">Categories</span>
     <table class="table">
         <thead>
         <tr>
