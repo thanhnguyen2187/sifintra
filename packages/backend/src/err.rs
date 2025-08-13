@@ -1,6 +1,11 @@
-use axum::http::{StatusCode};
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use diesel::SqliteConnection;
+use diesel::query_dsl::positional_order_dsl::PositionalOrderClause;
+use serde_json::json;
 use snafu::prelude::*;
+use std::sync::{LockResult, MutexGuard, PoisonError};
+use axum::Json;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -18,19 +23,32 @@ pub enum Error {
 
     #[snafu(display("I/O error: {source}"))]
     Io { source: std::io::Error },
+
+    #[snafu(display("Unable to acquire database lock"))]
+    DatabaseLock,
+
+    #[snafu(display("Database error: {source}"))]
+    Database { source: diesel::result::Error },
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Something went wrong: {}", self),
-        ).into_response()
+            Json(json!({"success": false, "message": format!("Something went wrong: {}", self)})),
+        )
+            .into_response()
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(source: std::io::Error) -> Self {
         Error::Io { source }
+    }
+}
+
+impl From<diesel::result::Error> for Error {
+    fn from(source: diesel::result::Error) -> Self {
+        Error::Database { source }
     }
 }
