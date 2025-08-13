@@ -1,19 +1,15 @@
-mod frontend;
 mod err;
+mod frontend;
+mod handlers;
 
-use axum::{Router, routing::get};
+use crate::handlers::handle_hook_sepay;
+use axum::{Router, routing::get, routing::post};
 
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route(
-            "/api/data",
-            get(async || {
-                tokio::time::sleep(std::time::Duration::from_secs(3)).await;
-
-                "text data after 3 seconds"
-            }),
-        )
+        .route("/api/v1/health", get(async || "alive!"))
+        .route("/api/v1/hooks/sepay", post(handle_hook_sepay))
         .fallback(frontend::static_handler);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
