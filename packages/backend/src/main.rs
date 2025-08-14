@@ -10,7 +10,6 @@ use crate::db::establish_connection;
 use crate::err::Result;
 use crate::handlers::handle_hook_sepay;
 use axum::{Router, routing::get, routing::post};
-use diesel::SqliteConnection;
 use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
 

@@ -29,9 +29,9 @@ diesel::table! {
 diesel::table! {
     user__transaction (id) {
         id -> Nullable<Text>,
-        date_timestamp_ms -> Integer,
+        date_timestamp -> Integer,
         description -> Text,
-        amount -> Float,
+        amount -> Integer,
         category_id -> Nullable<Text>,
         source_id -> Text,
         created_at -> Nullable<Timestamp>,

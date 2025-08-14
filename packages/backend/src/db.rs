@@ -1,8 +1,8 @@
 use crate::err::Result;
 use diesel::prelude::*;
+use serde_json::Value;
 use snafu::ResultExt;
 use std::env;
-use serde_json::Value;
 
 pub fn establish_connection() -> Result<SqliteConnection> {
     let database_url = env::var("DATABASE_URL")
@@ -11,10 +11,23 @@ pub fn establish_connection() -> Result<SqliteConnection> {
         .with_whatever_context(|err| format!("Failed to connect to {}: {}", database_url, err))
 }
 
-pub fn insert_raw_sepay(conn: &mut SqliteConnection, raw_sepay: &RawSepay) -> Result<usize> {
+pub fn insert_raw_sepay(conn: &mut SqliteConnection, record: &RawSepay) -> Result<usize> {
     use crate::schema::raw__sepay::dsl::*;
 
-    Ok(diesel::insert_into(raw__sepay).values(raw_sepay).execute(conn)?)
+    Ok(diesel::insert_into(raw__sepay)
+        .values(record)
+        .execute(conn)?)
+}
+
+pub fn insert_user_transaction(
+    conn: &mut SqliteConnection,
+    record: &UserTransaction,
+) -> Result<usize> {
+    use crate::schema::user__transaction::dsl::*;
+
+    Ok(diesel::insert_into(user__transaction)
+        .values(record)
+        .execute(conn)?)
 }
 
 #[derive(Insertable)]
@@ -32,4 +45,17 @@ pub struct RawSepay {
     pub referenceCode: String,
     pub accumulated: i32,
     pub id: i32,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::user__transaction)]
+pub struct UserTransaction {
+    pub id: String,
+    pub date_timestamp: i32,
+    pub description: String,
+    pub amount: i32,
+    pub category_id: Option<String>,
+    pub source_id: String,
+
+    pub created_at: Option<String>,
 }

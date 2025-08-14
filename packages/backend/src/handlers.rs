@@ -1,12 +1,16 @@
 use crate::app_state::AppState;
-use crate::db::{RawSepay, insert_raw_sepay};
+use crate::db::{RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction};
 use crate::err::{Error, Result};
 use axum::Json;
 use axum::extract::State;
+use chrono::format::Fixed::TimezoneOffset;
+use chrono::{DateTime, NaiveDateTime};
+use chrono::{FixedOffset, TimeZone};
+use diesel::Connection;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex};
+use uuid::Uuid;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,22 +38,61 @@ pub async fn handle_hook_sepay(
             &mut state.conn,
             &RawSepay {
                 gateway: payload.gateway,
-                transactionDate: payload.transaction_date,
+                transactionDate: payload.transaction_date.clone(),
                 accountNumber: payload.account_number,
                 subAccount: payload.sub_account.to_string(),
                 code: payload.code.to_string(),
                 content: payload.content,
                 transferType: payload.transfer_type,
-                description: payload.description,
+                description: payload.description.clone(),
                 transferAmount: payload.transfer_amount as i32,
                 referenceCode: payload.reference_code,
                 accumulated: payload.accumulated as i32,
                 id: payload.id as i32,
             },
         )?;
+        if insert_count <= 0 {
+            return Err(Error::DatabaseInsertError {
+                message: format!(
+                    "expected at least 1 record inserted to `raw__sepay`; got {}",
+                    insert_count,
+                )
+                .to_string(),
+            });
+        }
+
+        let date_timestamp_naive =
+            NaiveDateTime::parse_from_str(&payload.transaction_date, "%Y-%m-%d %H:%M:%S")?;
+        let offset = FixedOffset::east_opt(7 * 3_600).ok_or(Error::Unreachable)?;
+        let date_timestamp = offset
+            .from_local_datetime(&date_timestamp_naive)
+            .single()
+            .ok_or(Error::Unreachable)?;
+
+        let insert_count = insert_user_transaction(
+            &mut state.conn,
+            &UserTransaction {
+                id: Uuid::now_v7().to_string(),
+                date_timestamp: date_timestamp.timestamp() as i32,
+                description: payload.description,
+                amount: payload.transfer_amount as i32,
+                category_id: None,
+                source_id: "sepay".to_string(),
+                created_at: None,
+            },
+        )?;
+        if insert_count <= 0 {
+            return Err(Error::DatabaseInsertError {
+                message: format!(
+                    "expected at least 1 record inserted to `user__transaction`; got {}",
+                    insert_count,
+                )
+                .to_string(),
+            });
+        }
+
         return Ok(Json(json!({
             "success": true,
-            "insert_count": insert_count,
         })));
     }
 

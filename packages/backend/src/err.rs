@@ -1,3 +1,4 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use diesel::SqliteConnection;
@@ -5,7 +6,7 @@ use diesel::query_dsl::positional_order_dsl::PositionalOrderClause;
 use serde_json::json;
 use snafu::prelude::*;
 use std::sync::{LockResult, MutexGuard, PoisonError};
-use axum::Json;
+use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -27,6 +28,15 @@ pub enum Error {
     #[snafu(display("Unable to acquire database lock"))]
     DatabaseLock,
 
+    #[snafu(display("Database insert error: {message}"))]
+    DatabaseInsertError { message: String },
+
+    #[snafu(display("Parse date error: {source}"))]
+    ParseError { source: chrono::ParseError },
+
+    #[snafu(display("Unreachable code"))]
+    Unreachable,
+
     #[snafu(display("Database error: {source}"))]
     Database { source: diesel::result::Error },
 }
@@ -35,7 +45,7 @@ impl IntoResponse for Error {
     fn into_response(self) -> Response {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"success": false, "message": format!("Something went wrong: {}", self)})),
+            Json(json!({"success": false, "message": format!("{}", self)})),
         )
             .into_response()
     }
@@ -50,5 +60,11 @@ impl From<std::io::Error> for Error {
 impl From<diesel::result::Error> for Error {
     fn from(source: diesel::result::Error) -> Self {
         Error::Database { source }
+    }
+}
+
+impl From<chrono::ParseError> for Error {
+    fn from(source: chrono::ParseError) -> Self {
+        Error::ParseError { source }
     }
 }
