@@ -132,7 +132,8 @@ pub async fn handle_stats(
         let mut income = 0;
         let mut expense = 0;
         let mut current = 0;
-        let mut chart_data: HashMap<String, i32> = HashMap::new();
+        let mut expense_grouped: HashMap<String, i32> = HashMap::new();
+        let mut chart_data = Vec::new();
 
         for transaction in transactions {
             match transaction.amount > 0 {
@@ -141,13 +142,20 @@ pub async fn handle_stats(
                 }
                 false => {
                     expense += transaction.amount;
-                    let value = chart_data
+                    let value = expense_grouped
                         .entry(transaction.category_id.unwrap_or(String::from("n/a")))
                         .or_insert(0);
                     *value += transaction.amount;
                 }
             }
             current += transaction.amount;
+        }
+
+        for (key, value) in expense_grouped {
+            chart_data.push(json!({
+                "label": key,
+                "value": value,
+            }));
         }
 
         return Ok(Json(json!({
