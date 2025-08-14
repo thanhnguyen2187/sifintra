@@ -1,5 +1,8 @@
 use crate::app_state::AppState;
-use crate::db::{RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction};
+use crate::db::{
+    AmountType, RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction,
+    sum_transaction_amount,
+};
 use crate::err::{Error, Result};
 use axum::Json;
 use axum::extract::{Query, State};
@@ -76,7 +79,11 @@ pub async fn handle_hook_sepay(
                 id: Uuid::now_v7().to_string(),
                 date_timestamp: date_timestamp.timestamp() as i32,
                 description: payload.description,
-                amount: payload.transfer_amount as i32,
+                amount: if payload.transfer_amount > 0 {
+                    payload.transfer_amount
+                } else {
+                    -payload.transfer_amount
+                } as i32,
                 category_id: None,
                 source_id: "sepay".to_string(),
                 created_at: None,
@@ -103,8 +110,8 @@ pub async fn handle_hook_sepay(
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct StatsParams {
-    from_timestamp: i32,
-    to_timestamp: i32,
+    from_timestamp: Option<i32>,
+    to_timestamp: Option<i32>,
 }
 
 pub async fn handle_stats(
@@ -112,11 +119,24 @@ pub async fn handle_stats(
     State(state_arc): State<Arc<Mutex<AppState>>>,
 ) -> Result<Json<Value>> {
     if let Ok(mut state) = state_arc.lock() {
-        let from = params.from_timestamp;
-        let to = params.to_timestamp;
+        let income = sum_transaction_amount(
+            &mut state.conn,
+            &AmountType::Positive,
+            params.from_timestamp,
+            params.to_timestamp,
+        )?;
+        let expense = sum_transaction_amount(
+            &mut state.conn,
+            &AmountType::Negative,
+            params.from_timestamp,
+            params.to_timestamp,
+        )?;
+        let current = income - expense;
         return Ok(Json(json!({
-            "from": from,
-            "to": to,
+            "totalIncomeVND": income,
+            "totalExpenseVND": expense,
+            "currentBalanceVND": current,
+            "chartData": [],
         })));
     }
 

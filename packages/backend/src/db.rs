@@ -1,4 +1,5 @@
 use crate::err::Result;
+use diesel::expression::BoxableExpression;
 use diesel::prelude::*;
 use serde_json::Value;
 use snafu::ResultExt;
@@ -30,7 +31,42 @@ pub fn insert_user_transaction(
         .execute(conn)?)
 }
 
-#[derive(Insertable)]
+pub enum AmountType {
+    Positive,
+    Negative,
+}
+
+pub fn sum_transaction_amount(
+    conn: &mut SqliteConnection,
+    amount_type: &AmountType,
+    from_timestamp: Option<i32>,
+    to_timestamp: Option<i32>,
+) -> Result<i32> {
+    use crate::schema::user__transaction::dsl::*;
+
+    let mut query = user__transaction.into_boxed();
+
+    match amount_type {
+        AmountType::Positive => query = query.filter(amount.gt(0)),
+        AmountType::Negative => query = query.filter(amount.lt(0)),
+    };
+
+    if let Some(from_timestamp) = from_timestamp {
+        query = query.filter(date_timestamp.ge(from_timestamp));
+    }
+    if let Some(to_timestamp) = to_timestamp {
+        query = query.filter(date_timestamp.le(to_timestamp));
+    }
+
+    let total = query
+        .select(diesel::dsl::sum(amount))
+        .first::<Option<i64>>(conn)
+        .map(|result| result.unwrap_or(0) as i32)?;
+
+    Ok(total)
+}
+
+#[derive(Queryable, Insertable)]
 #[diesel(table_name = crate::schema::raw__sepay)]
 pub struct RawSepay {
     pub gateway: String,
@@ -47,7 +83,7 @@ pub struct RawSepay {
     pub id: i32,
 }
 
-#[derive(Insertable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::user__transaction)]
 pub struct UserTransaction {
     pub id: String,
