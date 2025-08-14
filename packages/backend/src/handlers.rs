@@ -2,13 +2,14 @@ use crate::app_state::AppState;
 use crate::db::{RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction};
 use crate::err::{Error, Result};
 use axum::Json;
-use axum::extract::State;
+use axum::extract::{Query, State};
 use chrono::format::Fixed::TimezoneOffset;
 use chrono::{DateTime, NaiveDateTime};
 use chrono::{FixedOffset, TimeZone};
 use diesel::Connection;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
@@ -93,6 +94,29 @@ pub async fn handle_hook_sepay(
 
         return Ok(Json(json!({
             "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct StatsParams {
+    from_timestamp: i32,
+    to_timestamp: i32,
+}
+
+pub async fn handle_stats(
+    Query(params): Query<StatsParams>,
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let from = params.from_timestamp;
+        let to = params.to_timestamp;
+        return Ok(Json(json!({
+            "from": from,
+            "to": to,
         })));
     }
 
