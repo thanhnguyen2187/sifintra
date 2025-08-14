@@ -1,12 +1,8 @@
 use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use diesel::SqliteConnection;
-use diesel::query_dsl::positional_order_dsl::PositionalOrderClause;
 use serde_json::json;
 use snafu::prelude::*;
-use std::sync::{LockResult, MutexGuard, PoisonError};
-use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
