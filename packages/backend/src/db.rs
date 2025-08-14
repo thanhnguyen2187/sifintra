@@ -66,8 +66,31 @@ pub fn sum_transaction_amount(
     Ok(total)
 }
 
+pub fn select_transactions(
+    conn: &mut SqliteConnection,
+    from_timestamp: Option<i32>,
+    to_timestamp: Option<i32>,
+) -> Result<Vec<UserTransaction>> {
+    use crate::schema::user__transaction::dsl::*;
+
+    let mut query = user__transaction.into_boxed();
+    if let Some(from_timestamp) = from_timestamp {
+        query = query.filter(date_timestamp.ge(from_timestamp));
+    }
+    if let Some(to_timestamp) = to_timestamp {
+        query = query.filter(date_timestamp.le(to_timestamp));
+    }
+
+    let records = query
+        .select(UserTransaction::as_select())
+        .load(conn)?;
+
+    Ok(records)
+}
+
 #[derive(Queryable, Insertable)]
 #[diesel(table_name = crate::schema::raw__sepay)]
+#[allow(non_snake_case)]
 pub struct RawSepay {
     pub gateway: String,
     pub transactionDate: String,
@@ -85,8 +108,9 @@ pub struct RawSepay {
 
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::user__transaction)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct UserTransaction {
-    pub id: String,
+    pub id: Option<String>,
     pub date_timestamp: i32,
     pub description: String,
     pub amount: i32,

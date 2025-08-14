@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::db::{
     AmountType, RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction,
-    sum_transaction_amount,
+    select_transactions, sum_transaction_amount,
 };
 use crate::err::{Error, Result};
 use axum::Json;
@@ -14,6 +14,7 @@ use serde_derive::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use tracing::info;
 use uuid::Uuid;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -47,7 +48,7 @@ pub async fn handle_hook_sepay(
                 subAccount: payload.sub_account.to_string(),
                 code: payload.code.to_string(),
                 content: payload.content,
-                transferType: payload.transfer_type,
+                transferType: payload.transfer_type.clone(),
                 description: payload.description.clone(),
                 transferAmount: payload.transfer_amount as i32,
                 referenceCode: payload.reference_code,
@@ -55,6 +56,12 @@ pub async fn handle_hook_sepay(
                 id: payload.id as i32,
             },
         )?;
+        info!(
+            "Received SePay hook ID {}; transfer type {}; amount {}",
+            payload.id,
+            payload.transfer_type.clone(),
+            payload.transfer_amount
+        );
         if insert_count <= 0 {
             return Err(Error::DatabaseInsertError {
                 message: format!(
@@ -76,10 +83,10 @@ pub async fn handle_hook_sepay(
         let insert_count = insert_user_transaction(
             &mut state.conn,
             &UserTransaction {
-                id: Uuid::now_v7().to_string(),
+                id: Some(Uuid::now_v7().to_string()),
                 date_timestamp: date_timestamp.timestamp() as i32,
                 description: payload.description,
-                amount: if payload.transfer_amount > 0 {
+                amount: if payload.transfer_type == "in" {
                     payload.transfer_amount
                 } else {
                     -payload.transfer_amount
@@ -119,24 +126,35 @@ pub async fn handle_stats(
     State(state_arc): State<Arc<Mutex<AppState>>>,
 ) -> Result<Json<Value>> {
     if let Ok(mut state) = state_arc.lock() {
-        let income = sum_transaction_amount(
-            &mut state.conn,
-            &AmountType::Positive,
-            params.from_timestamp,
-            params.to_timestamp,
-        )?;
-        let expense = sum_transaction_amount(
-            &mut state.conn,
-            &AmountType::Negative,
-            params.from_timestamp,
-            params.to_timestamp,
-        )?;
-        let current = income - expense;
+        let transactions =
+            select_transactions(&mut state.conn, params.from_timestamp, params.to_timestamp)?;
+
+        let mut income = 0;
+        let mut expense = 0;
+        let mut current = 0;
+        let mut chart_data: HashMap<String, i32> = HashMap::new();
+
+        for transaction in transactions {
+            match transaction.amount > 0 {
+                true => {
+                    income += transaction.amount;
+                }
+                false => {
+                    expense += transaction.amount;
+                    let value = chart_data
+                        .entry(transaction.category_id.unwrap_or(String::from("n/a")))
+                        .or_insert(0);
+                    *value += transaction.amount;
+                }
+            }
+            current += transaction.amount;
+        }
+
         return Ok(Json(json!({
             "totalIncomeVND": income,
             "totalExpenseVND": expense,
             "currentBalanceVND": current,
-            "chartData": [],
+            "chartData": chart_data,
         })));
     }
 
