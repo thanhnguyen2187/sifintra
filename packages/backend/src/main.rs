@@ -8,7 +8,10 @@ mod schema;
 use crate::app_state::AppState;
 use crate::db::establish_connection;
 use crate::err::Result;
-use crate::handlers::{handle_category_create, handle_category_delete, handle_category_list, handle_category_update, handle_hook_sepay, handle_stats, handle_transaction_create, handle_transaction_list};
+use crate::handlers::{
+    handle_category_create, handle_category_delete, handle_category_list, handle_category_update,
+    handle_hook_sepay, handle_stats, handle_transaction_create, handle_transaction_list,
+};
 use axum::routing::{delete, put};
 use axum::{
     Router,
@@ -20,6 +23,7 @@ use axum::{
 };
 use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -56,6 +60,7 @@ async fn main() -> Result<()> {
         .route("/api/v1/categories", put(handle_category_update))
         .route("/api/v1/categories", delete(handle_category_delete))
         .fallback(frontend::static_handler)
+        .layer(CorsLayer::new().allow_methods(Any).allow_origin(Any))
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;

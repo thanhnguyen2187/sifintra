@@ -20,4 +20,4 @@ chrono = "0.4.41"
 uuid = { version = "1.18.0", features = ["v4", "v7"] }
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tracing = "0.1.41"
-tower-http = { version = "0.6.6", features = ["trace"] }
+tower-http = { version = "0.6.6", features = ["trace", "cors"] }
