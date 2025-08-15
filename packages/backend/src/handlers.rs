@@ -1,8 +1,8 @@
 use crate::app_state::AppState;
 use crate::db::{
-    AmountType, Category, RawSepay, UserTransaction, insert_category, insert_raw_sepay,
-    insert_user_transaction, select_categories, select_transactions, sum_transaction_amount,
-    update_category,
+    AmountType, Category, RawSepay, UserTransaction, delete_category, insert_category,
+    insert_raw_sepay, insert_user_transaction, select_categories, select_transactions,
+    sum_transaction_amount, update_category,
 };
 use crate::err::{Error, Result};
 use axum::Json;
@@ -64,7 +64,7 @@ pub async fn handle_hook_sepay(
             payload.transfer_amount
         );
         if insert_count <= 0 {
-            return Err(Error::DatabaseInsertError {
+            return Err(Error::DatabaseDataError {
                 message: format!(
                     "expected at least 1 record inserted to `raw__sepay`; got {}",
                     insert_count,
@@ -98,7 +98,7 @@ pub async fn handle_hook_sepay(
             },
         )?;
         if insert_count <= 0 {
-            return Err(Error::DatabaseInsertError {
+            return Err(Error::DatabaseDataError {
                 message: format!(
                     "expected at least 1 record inserted to `user__transaction`; got {}",
                     insert_count,
@@ -280,7 +280,7 @@ pub async fn handle_category_create(
         )?;
 
         if insert_count != 1 {
-            return Err(Error::DatabaseInsertError {
+            return Err(Error::DatabaseDataError {
                 message: format!(
                     "error happened inserting; expected 1 record change; got {}",
                     insert_count,
@@ -319,10 +319,40 @@ pub async fn handle_category_update(
         )?;
 
         if insert_count != 1 {
-            return Err(Error::DatabaseInsertError {
+            return Err(Error::DatabaseDataError {
                 message: format!(
-                    "error happened inserting; expected 1 record change; got {}",
+                    "error happened updating; expected 1 record change; got {}",
                     insert_count,
+                ),
+            });
+        }
+
+        return Ok(Json(json!({
+            "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CategoryDeletePayload {
+    id: String,
+}
+
+pub async fn handle_category_delete(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Json(payload): Json<CategoryDeletePayload>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let count = delete_category(&mut state.conn, payload.id)?;
+
+        if count != 1 {
+            return Err(Error::DatabaseDataError {
+                message: format!(
+                    "error happened deleting; expected 1 record change; got {}",
+                    count,
                 ),
             });
         }

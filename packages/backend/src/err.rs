@@ -24,8 +24,8 @@ pub enum Error {
     #[snafu(display("Unable to acquire database lock"))]
     DatabaseLock,
 
-    #[snafu(display("Database insert error: {message}"))]
-    DatabaseInsertError { message: String },
+    #[snafu(display("Database data error: {message}"))]
+    DatabaseDataError { message: String },
 
     #[snafu(display("Parse date error: {source}"))]
     ParseError { source: chrono::ParseError },

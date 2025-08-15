@@ -122,6 +122,12 @@ pub fn update_category(conn: &mut SqliteConnection, record: &Category) -> Result
     )
 }
 
+pub fn delete_category(conn: &mut SqliteConnection, id_: String) -> Result<usize> {
+    use crate::schema::user__category::dsl::*;
+
+    Ok(diesel::delete(user__category.filter(id.eq(id_))).execute(conn)?)
+}
+
 #[derive(Queryable, Insertable)]
 #[diesel(table_name = crate::schema::raw__sepay)]
 #[allow(non_snake_case)]
