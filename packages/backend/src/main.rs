@@ -9,7 +9,8 @@ use crate::app_state::AppState;
 use crate::db::establish_connection;
 use crate::err::Result;
 use crate::handlers::{
-    handle_hook_sepay, handle_stats, handle_transaction_create, handle_transaction_list,
+    handle_category_list, handle_hook_sepay, handle_stats, handle_transaction_create,
+    handle_transaction_list,
 };
 use axum::{
     Router,
@@ -52,6 +53,7 @@ async fn main() -> Result<()> {
         .route("/api/v1/stats", get(handle_stats))
         .route("/api/v1/transactions", get(handle_transaction_list))
         .route("/api/v1/transactions", post(handle_transaction_create))
+        .route("/api/v1/categories", get(handle_category_list))
         .fallback(frontend::static_handler)
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);

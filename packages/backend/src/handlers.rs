@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::db::{
     AmountType, RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction,
-    select_transactions, sum_transaction_amount,
+    select_categories, select_transactions, sum_transaction_amount,
 };
 use crate::err::{Error, Result};
 use axum::Json;
@@ -237,6 +237,20 @@ pub async fn handle_transaction_create(
 
         return Ok(Json(json!({
             "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+pub async fn handle_category_list(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let records = select_categories(&mut state.conn)?;
+
+        return Ok(Json(json!({
+            "data": records,
         })));
     }
 

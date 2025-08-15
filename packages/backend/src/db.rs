@@ -1,10 +1,10 @@
 use crate::err::Result;
 use diesel::expression::BoxableExpression;
 use diesel::prelude::*;
+use serde_derive::Serialize;
 use serde_json::Value;
 use snafu::ResultExt;
 use std::env;
-use serde_derive::Serialize;
 
 pub fn establish_connection() -> Result<SqliteConnection> {
     let database_url = env::var("DATABASE_URL")
@@ -95,6 +95,12 @@ pub fn select_transactions(
     Ok(records)
 }
 
+pub fn select_categories(conn: &mut SqliteConnection) -> Result<Vec<Category>> {
+    use crate::schema::user__category::dsl::*;
+
+    Ok(user__category.select(Category::as_select()).load(conn)?)
+}
+
 #[derive(Queryable, Insertable)]
 #[diesel(table_name = crate::schema::raw__sepay)]
 #[allow(non_snake_case)]
@@ -125,4 +131,14 @@ pub struct UserTransaction {
     pub source_id: String,
 
     pub created_at: Option<String>,
+}
+
+#[derive(Queryable, Selectable, Insertable, Serialize)]
+#[diesel(table_name = crate::schema::user__category)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct Category {
+    pub id: Option<String>,
+    pub name: String,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
 }
