@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::db::{
-    AmountType, RawSepay, UserTransaction, insert_raw_sepay, insert_user_transaction,
-    select_categories, select_transactions, sum_transaction_amount,
+    AmountType, Category, RawSepay, UserTransaction, insert_category, insert_raw_sepay,
+    insert_user_transaction, select_categories, select_transactions, sum_transaction_amount,
 };
 use crate::err::{Error, Result};
 use axum::Json;
@@ -251,6 +251,44 @@ pub async fn handle_category_list(
 
         return Ok(Json(json!({
             "data": records,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CategoryCreatePayload {
+    name: String,
+}
+
+pub async fn handle_category_create(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Json(payload): Json<CategoryCreatePayload>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let insert_count = insert_category(
+            &mut state.conn,
+            &Category {
+                id: None,
+                name: payload.name,
+                created_at: None,
+                updated_at: None,
+            },
+        )?;
+
+        if insert_count != 1 {
+            return Err(Error::DatabaseInsertError {
+                message: format!(
+                    "error happened inserting; expected 1 record change; got {}",
+                    insert_count,
+                ),
+            });
+        }
+
+        return Ok(Json(json!({
+            "success": true,
         })));
     }
 

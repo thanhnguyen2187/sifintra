@@ -101,6 +101,14 @@ pub fn select_categories(conn: &mut SqliteConnection) -> Result<Vec<Category>> {
     Ok(user__category.select(Category::as_select()).load(conn)?)
 }
 
+pub fn insert_category(conn: &mut SqliteConnection, record: &Category) -> Result<usize> {
+    use crate::schema::user__category::dsl::*;
+
+    Ok(diesel::insert_into(user__category)
+        .values(record)
+        .execute(conn)?)
+}
+
 #[derive(Queryable, Insertable)]
 #[diesel(table_name = crate::schema::raw__sepay)]
 #[allow(non_snake_case)]
