@@ -4,6 +4,7 @@ use diesel::prelude::*;
 use serde_json::Value;
 use snafu::ResultExt;
 use std::env;
+use serde_derive::Serialize;
 
 pub fn establish_connection() -> Result<SqliteConnection> {
     let database_url = env::var("DATABASE_URL")
@@ -70,6 +71,8 @@ pub fn select_transactions(
     conn: &mut SqliteConnection,
     from_timestamp: Option<i32>,
     to_timestamp: Option<i32>,
+    offset: Option<i32>,
+    limit: Option<i32>,
 ) -> Result<Vec<UserTransaction>> {
     use crate::schema::user__transaction::dsl::*;
 
@@ -80,10 +83,14 @@ pub fn select_transactions(
     if let Some(to_timestamp) = to_timestamp {
         query = query.filter(date_timestamp.le(to_timestamp));
     }
+    if let Some(offset) = offset {
+        query = query.offset(offset as i64);
+    }
+    if let Some(limit) = limit {
+        query = query.limit(limit as i64);
+    }
 
-    let records = query
-        .select(UserTransaction::as_select())
-        .load(conn)?;
+    let records = query.select(UserTransaction::as_select()).load(conn)?;
 
     Ok(records)
 }
@@ -106,7 +113,7 @@ pub struct RawSepay {
     pub id: i32,
 }
 
-#[derive(Queryable, Selectable, Insertable)]
+#[derive(Queryable, Selectable, Insertable, Serialize)]
 #[diesel(table_name = crate::schema::user__transaction)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct UserTransaction {

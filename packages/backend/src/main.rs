@@ -8,7 +8,7 @@ mod schema;
 use crate::app_state::AppState;
 use crate::db::establish_connection;
 use crate::err::Result;
-use crate::handlers::{handle_hook_sepay, handle_stats};
+use crate::handlers::{handle_hook_sepay, handle_stats, handle_transaction_list};
 use axum::{
     Router,
     body::Bytes,
@@ -48,6 +48,7 @@ async fn main() -> Result<()> {
         .route("/api/v1/health", get(async || "alive!"))
         .route("/api/v1/hooks/sepay", post(handle_hook_sepay))
         .route("/api/v1/stats", get(handle_stats))
+        .route("/api/v1/transactions", get(handle_transaction_list))
         .fallback(frontend::static_handler)
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);

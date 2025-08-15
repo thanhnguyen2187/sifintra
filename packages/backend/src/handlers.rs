@@ -126,8 +126,13 @@ pub async fn handle_stats(
     State(state_arc): State<Arc<Mutex<AppState>>>,
 ) -> Result<Json<Value>> {
     if let Ok(mut state) = state_arc.lock() {
-        let transactions =
-            select_transactions(&mut state.conn, params.from_timestamp, params.to_timestamp)?;
+        let transactions = select_transactions(
+            &mut state.conn,
+            params.from_timestamp,
+            params.to_timestamp,
+            None,
+            None,
+        )?;
 
         let mut income = 0;
         let mut expense = 0;
@@ -163,6 +168,40 @@ pub async fn handle_stats(
             "totalExpenseVND": expense,
             "currentBalanceVND": current,
             "chartData": chart_data,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct TransactionListParams {
+    from_timestamp: Option<i32>,
+    to_timestamp: Option<i32>,
+    page: Option<i32>,
+    limit: Option<i32>,
+}
+
+pub async fn handle_transaction_list(
+    Query(params): Query<TransactionListParams>,
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let offset = params.page.and_then(|page| {
+            let limit = params.limit?;
+            Some(page * limit)
+        });
+        let transactions = select_transactions(
+            &mut state.conn,
+            params.from_timestamp,
+            params.to_timestamp,
+            offset,
+            params.limit,
+        )?;
+
+        return Ok(Json(json!({
+            "data": transactions,
         })));
     }
 
