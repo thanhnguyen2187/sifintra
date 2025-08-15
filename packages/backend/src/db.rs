@@ -1,4 +1,4 @@
-use crate::err::Result;
+use crate::err::{Error, Result};
 use diesel::expression::BoxableExpression;
 use diesel::prelude::*;
 use serde_derive::Serialize;
@@ -107,6 +107,19 @@ pub fn insert_category(conn: &mut SqliteConnection, record: &Category) -> Result
     Ok(diesel::insert_into(user__category)
         .values(record)
         .execute(conn)?)
+}
+
+pub fn update_category(conn: &mut SqliteConnection, record: &Category) -> Result<usize> {
+    use crate::schema::user__category::dsl::*;
+
+    Ok(
+        diesel::update(user__category.filter(id.eq(record.id.clone())))
+            .set((
+                name.eq(record.name.clone()),
+                updated_at.eq(record.updated_at.clone()),
+            ))
+            .execute(conn)?,
+    )
 }
 
 #[derive(Queryable, Insertable)]

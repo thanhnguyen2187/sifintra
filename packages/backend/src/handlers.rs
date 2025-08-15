@@ -2,12 +2,13 @@ use crate::app_state::AppState;
 use crate::db::{
     AmountType, Category, RawSepay, UserTransaction, insert_category, insert_raw_sepay,
     insert_user_transaction, select_categories, select_transactions, sum_transaction_amount,
+    update_category,
 };
 use crate::err::{Error, Result};
 use axum::Json;
 use axum::extract::{Query, State};
 use chrono::format::Fixed::TimezoneOffset;
-use chrono::{DateTime, NaiveDateTime};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use chrono::{FixedOffset, TimeZone};
 use diesel::Connection;
 use serde_derive::{Deserialize, Serialize};
@@ -271,10 +272,49 @@ pub async fn handle_category_create(
         let insert_count = insert_category(
             &mut state.conn,
             &Category {
-                id: None,
+                id: Some(Uuid::now_v7().to_string()),
                 name: payload.name,
                 created_at: None,
                 updated_at: None,
+            },
+        )?;
+
+        if insert_count != 1 {
+            return Err(Error::DatabaseInsertError {
+                message: format!(
+                    "error happened inserting; expected 1 record change; got {}",
+                    insert_count,
+                ),
+            });
+        }
+
+        return Ok(Json(json!({
+            "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CategoryUpdatePayload {
+    id: String,
+    name: String,
+}
+
+pub async fn handle_category_update(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Json(payload): Json<CategoryUpdatePayload>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let insert_count = update_category(
+            &mut state.conn,
+            &Category {
+                id: Some(payload.id),
+                name: payload.name,
+                created_at: None,
+                updated_at: Some(Utc::now().format("%Y-%m-%d %H:%M:%S").to_string()),
             },
         )?;
 
