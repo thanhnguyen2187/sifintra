@@ -208,11 +208,33 @@ pub async fn handle_transaction_list(
     Err(Error::DatabaseLock)
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionCreatePayload {
+    amount: i32,
+    description: String,
+    date_timestamp: i32,
+    category_id: Option<String>,
+}
+
 pub async fn handle_transaction_create(
-    Query(params): Query<TransactionListParams>,
     State(state_arc): State<Arc<Mutex<AppState>>>,
+    Json(payload): Json<TransactionCreatePayload>,
 ) -> Result<Json<Value>> {
     if let Ok(mut state) = state_arc.lock() {
+        insert_user_transaction(
+            &mut state.conn,
+            &UserTransaction {
+                id: None,
+                amount: payload.amount,
+                description: payload.description,
+                date_timestamp: payload.date_timestamp,
+                category_id: payload.category_id,
+                created_at: None,
+                source_id: String::from("user"),
+            },
+        )?;
+
         return Ok(Json(json!({
             "success": true,
         })));
