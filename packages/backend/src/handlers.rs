@@ -147,11 +147,15 @@ pub async fn handle_stats(
                     income += transaction.amount;
                 }
                 false => {
-                    expense += transaction.amount;
+                    expense += -transaction.amount;
                     let value = expense_grouped
-                        .entry(transaction.category_id.unwrap_or(String::from("n/a")))
+                        .entry(
+                            transaction
+                                .category_id
+                                .unwrap_or(String::from("_uncategorized")),
+                        )
                         .or_insert(0);
-                    *value += transaction.amount;
+                    *value += -transaction.amount;
                 }
             }
             current += transaction.amount;
@@ -165,10 +169,12 @@ pub async fn handle_stats(
         }
 
         return Ok(Json(json!({
-            "totalIncomeVND": income,
-            "totalExpenseVND": expense,
-            "currentBalanceVND": current,
-            "chartData": chart_data,
+            "data": {
+                "totalIncomeVND": income,
+                "totalExpenseVND": expense,
+                "currentBalanceVND": current,
+                "chartData": chart_data,
+            }
         })));
     }
 
