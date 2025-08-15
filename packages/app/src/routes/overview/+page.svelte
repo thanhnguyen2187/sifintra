@@ -1,26 +1,32 @@
 <script lang="ts">
 import { Chart } from "chart.js/auto";
 import { onMount } from "svelte";
+import { httpClient } from "$lib/default";
 
 let pieChart: HTMLCanvasElement;
+let totalIncome = $state(0);
+let totalExpense = $state(0);
+let currentBalance = $state(0);
 // Chart.register(PieController, ArcElement);
 
-onMount(() => {
-  const data = [
-    { name: "Entertainment", value: 10 },
-    { name: "Food", value: 20 },
-    { name: "Cats", value: 20 },
-    { name: "Others", value: 15 },
-  ];
+onMount(async () => {
+  const stats = await httpClient.fetchStats();
+
+  const labels = stats.data.chartData.map((record) =>
+    record.label === "_uncategorized" ? "Uncategorized" : record.label,
+  );
+  const values = stats.data.chartData.map((record) => record.value);
+  totalExpense = stats.data.totalExpenseVND;
+  totalIncome = stats.data.totalIncomeVND;
+  currentBalance = stats.data.currentBalanceVND;
 
   new Chart(pieChart, {
     type: "pie",
     data: {
-      labels: data.map((row) => row.name),
+      labels,
       datasets: [
         {
-          label: "Category",
-          data: data.map((row) => row.value),
+          data: values,
         },
       ],
     },
@@ -59,9 +65,9 @@ onMount(() => {
         </thead>
         <tbody>
         <tr>
-            <td>3,432,321 VND</td>
-            <td class="text-center">2,432,321 VND</td>
-            <td class="text-right">1,987,321 VND</td>
+            <td>{totalIncome} VND</td>
+            <td class="text-center">{totalExpense} VND</td>
+            <td class="text-right">{currentBalance} VND</td>
         </tr>
         </tbody>
     </table>
