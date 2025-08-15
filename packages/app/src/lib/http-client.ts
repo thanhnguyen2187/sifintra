@@ -1,7 +1,13 @@
 import type { Category, CategoryNoId, Stats, Transaction } from "./types";
 
 export type HttpClient = {
-  fetchStats(): Promise<{
+  fetchStats({
+    fromTimestamp,
+    toTimestamp,
+  }: {
+    fromTimestamp?: number;
+    toTimestamp?: number;
+  }): Promise<{
     data: Stats;
   }>;
   fetchTransactions(): Promise<{
@@ -18,8 +24,14 @@ export type HttpClient = {
 
 export function createHttpClient(baseUrl: string): HttpClient {
   return {
-    async fetchStats() {
+    async fetchStats({ fromTimestamp, toTimestamp }) {
       const url = new URL("/api/v1/stats", baseUrl);
+      if (fromTimestamp) {
+        url.searchParams.set("from-timestamp", fromTimestamp.toFixed());
+      }
+      if (toTimestamp) {
+        url.searchParams.set("to-timestamp", toTimestamp.toFixed());
+      }
       const resp = await fetch(url);
       const respJson = (await resp.json()) as { data: Stats };
       return respJson;
