@@ -207,3 +207,16 @@ pub async fn handle_transaction_list(
 
     Err(Error::DatabaseLock)
 }
+
+pub async fn handle_transaction_create(
+    Query(params): Query<TransactionListParams>,
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        return Ok(Json(json!({
+            "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
