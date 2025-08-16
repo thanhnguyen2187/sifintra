@@ -4,7 +4,7 @@ import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { httpClient } from "$lib/default";
 
 let pieChart: HTMLCanvasElement | undefined = $state(undefined);
-let chart: Chart | undefined;
+let chart: Chart | undefined = $state(undefined);
 let chartState: "idling" | "loading" | "error" = $state("idling");
 
 let totalIncome = $state(0);
@@ -44,9 +44,6 @@ $effect(() => {
 
     if (chart) {
       chart.destroy();
-    }
-    if (chart === undefined) {
-      return;
     }
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
     chart = new Chart(pieChart!, {
@@ -108,12 +105,11 @@ function handleDateFilterButton(
 </script>
 
 {#snippet chartSnippet()}
-    {#if chartState === "idling"}
-        <canvas
-            bind:this={pieChart}
-            class="max-h-[40em] pt-2"
-        ></canvas>
-    {:else if chartState === "loading"}
+    <canvas
+        bind:this={pieChart}
+        class="max-h-[40em] pt-2"
+    ></canvas>
+    {#if chartState === "loading"}
         <p>
             Loading...
         </p>
