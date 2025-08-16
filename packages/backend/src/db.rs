@@ -109,7 +109,7 @@ pub fn count_transactions(
     if let Some(to_timestamp) = to_timestamp {
         query = query.filter(date_timestamp.le(to_timestamp));
     }
-    
+
     Ok(query.count().get_result(conn)?)
 }
 
@@ -167,6 +167,7 @@ pub struct RawSepay {
 #[derive(Queryable, Selectable, Insertable, Serialize)]
 #[diesel(table_name = crate::schema::user__transaction)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[serde(rename_all = "camelCase")]
 pub struct UserTransaction {
     pub id: Option<String>,
     pub date_timestamp: i32,

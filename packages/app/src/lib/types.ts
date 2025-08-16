@@ -6,10 +6,10 @@ export type Stats = {
 };
 
 export type Transaction = {
-  date_timestamp: number;
+  dateTimestamp: number;
   description: string;
   amount: number;
-  categoryId: string;
+  categoryId: string | null;
 };
 
 export type Category = {

@@ -33,7 +33,7 @@ $effect(() => {
     });
     records = response.data.map((transaction) => ({
       ...transaction,
-      date: new Date(transaction.date_timestamp * 1_000).toLocaleDateString(
+      date: new Date(transaction.dateTimestamp * 1_000).toLocaleDateString(
         "vi-vn",
       ),
       amount: Math.abs(transaction.amount),
@@ -133,11 +133,11 @@ function handleDateFilterButton(
                 <td>{record.amount}</td>
                 <td>{record.type}</td>
                 <td>
-                    <select class="select">
-                        <option disabled selected>Pick a category</option>
-                        <option>Crimson</option>
-                        <option>Amber</option>
-                        <option>Velvet</option>
+                    <select class="select" bind:value={record.categoryId}>
+                        <option value={null}>Uncategorized</option>
+                        {#each categories as category}
+                            <option value={category.id}>{category.name}</option>
+                        {/each}
                     </select>
                 </td>
             </tr>
