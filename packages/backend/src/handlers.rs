@@ -246,7 +246,7 @@ pub async fn handle_transaction_create(
         insert_user_transaction(
             &mut state.conn,
             &UserTransaction {
-                id: None,
+                id: Some(Uuid::now_v7().to_string()),
                 amount: payload.amount,
                 description: payload.description,
                 date_timestamp: payload.date_timestamp,
