@@ -95,6 +95,24 @@ pub fn select_transactions(
     Ok(records)
 }
 
+pub fn count_transactions(
+    conn: &mut SqliteConnection,
+    from_timestamp: Option<i32>,
+    to_timestamp: Option<i32>,
+) -> Result<i64> {
+    use crate::schema::user__transaction::dsl::*;
+
+    let mut query = user__transaction.into_boxed();
+    if let Some(from_timestamp) = from_timestamp {
+        query = query.filter(date_timestamp.ge(from_timestamp));
+    }
+    if let Some(to_timestamp) = to_timestamp {
+        query = query.filter(date_timestamp.le(to_timestamp));
+    }
+    
+    Ok(query.count().get_result(conn)?)
+}
+
 pub fn select_categories(conn: &mut SqliteConnection) -> Result<Vec<Category>> {
     use crate::schema::user__category::dsl::*;
 

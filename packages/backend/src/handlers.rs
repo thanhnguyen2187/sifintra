@@ -1,9 +1,5 @@
 use crate::app_state::AppState;
-use crate::db::{
-    AmountType, Category, RawSepay, UserTransaction, delete_category, insert_category,
-    insert_raw_sepay, insert_user_transaction, select_categories, select_transactions,
-    sum_transaction_amount, update_category,
-};
+use crate::db::{AmountType, Category, RawSepay, UserTransaction, delete_category, insert_category, insert_raw_sepay, insert_user_transaction, select_categories, select_transactions, sum_transaction_amount, update_category, count_transactions};
 use crate::err::{Error, Result};
 use axum::Json;
 use axum::extract::{Query, State};
@@ -218,9 +214,15 @@ pub async fn handle_transaction_list(
             Some(offset),
             Some(limit),
         )?;
+        let total = count_transactions(
+            &mut state.conn,
+            params.from_timestamp,
+            params.to_timestamp,
+        )?;
 
         return Ok(Json(json!({
             "data": transactions,
+            "total": total,
         })));
     }
 
