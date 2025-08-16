@@ -89,6 +89,7 @@ pub fn select_transactions(
     if let Some(limit) = limit {
         query = query.limit(limit as i64);
     }
+    query = query.order(date_timestamp.desc());
 
     let records = query.select(UserTransaction::as_select()).load(conn)?;
 
