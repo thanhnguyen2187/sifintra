@@ -1,16 +1,27 @@
 <script lang="ts">
+/** biome-ignore-all lint/style/useImportType: false positive */
 import EditIcon from "virtual:icons/mynaui/edit-solid";
 import PlusIcon from "virtual:icons/mynaui/plus-solid";
 import TrashIcon from "virtual:icons/mynaui/trash-solid";
 import { onMount } from "svelte";
+import Toaster from "$lib/components/Toaster.svelte";
 import { httpClient } from "$lib/default";
-import type { Category } from "$lib/types";
+import { type Category, createCategoryEmpty } from "$lib/types";
+import EditModal from "./EditModal.svelte";
+
+let modal: EditModal;
+let toaster: Toaster;
 
 let records: Category[] = $state([]);
 
 async function populateRecords() {
   const resp = await httpClient.fetchCategories();
   records = resp.data;
+}
+
+function handleAdd() {
+  modal.setRecord(createCategoryEmpty());
+  modal.show();
 }
 
 onMount(() => {
@@ -53,7 +64,10 @@ onMount(() => {
         <tfoot>
         <tr>
             <td class="text-right" colspan="4">
-                <button class="btn">
+                <button
+                    class="btn"
+                    onclick={handleAdd}
+                >
                     <PlusIcon />
                     Add
                 </button>
@@ -66,3 +80,18 @@ onMount(() => {
         <a class="underline" href="/">Back</a>
     </div>
 </div>
+
+<EditModal
+    bind:this={modal}
+    onSuccess={() => {
+        populateRecords();
+        toaster.setMessageSuccess("Succeeded!");
+        modal.hide();
+    }}
+    onFailure={() => {
+        toaster.setMessageError("Error happened. Please try again later.");
+    }}
+/>
+<Toaster
+    bind:this={toaster}
+/>

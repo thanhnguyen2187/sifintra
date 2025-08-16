@@ -23,9 +23,11 @@ export type TransactionEdit = Transaction & {
 export type Category = {
   id: string;
   name: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type CategoryNoId = Exclude<Category, "id">;
+export type CategoryEdit = { id: string | null; name: string };
 
 export function createTransactionEmpty(): TransactionEdit {
   return {
@@ -50,5 +52,12 @@ export function createTransactionEdit(
     ),
     type: transaction.amount > 0 ? "income" : "expense",
     amount: Math.abs(transaction.amount),
+  };
+}
+
+export function createCategoryEmpty(): CategoryEdit {
+  return {
+    id: null,
+    name: "",
   };
 }

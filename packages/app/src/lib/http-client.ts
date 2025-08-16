@@ -1,6 +1,6 @@
 import type {
   Category,
-  CategoryNoId,
+  CategoryEdit,
   Stats,
   Transaction,
   TransactionEdit,
@@ -46,8 +46,8 @@ export type HttpClient = {
   fetchCategories(): Promise<{
     data: Category[];
   }>;
-  createCategory({ name }: CategoryNoId): Promise<void>;
-  updateCategory({ id, name }: Category): Promise<void>;
+  createCategory({ name }: CategoryEdit): Promise<void>;
+  updateCategory({ id, name }: CategoryEdit): Promise<void>;
   deleteCategory({ id }: { id: string }): Promise<void>;
 };
 
@@ -151,8 +151,19 @@ export function createHttpClient(baseUrl: string): HttpClient {
       const respJson = (await resp.json()) as { data: Category[] };
       return respJson;
     },
-    async createCategory() {
-      throw new Error("unimplemented");
+    async createCategory(category) {
+      const url = new URL("/api/v1/categories", baseUrl);
+      const payload = JSON.stringify(category);
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(`Error happened creating; status: ${resp.status}`);
+      }
     },
     async updateCategory() {
       throw new Error("unimplemented");
