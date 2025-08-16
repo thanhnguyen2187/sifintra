@@ -1,5 +1,9 @@
 use crate::app_state::AppState;
-use crate::db::{AmountType, Category, RawSepay, UserTransaction, delete_category, insert_category, insert_raw_sepay, insert_user_transaction, select_categories, select_transactions, sum_transaction_amount, update_category, count_transactions};
+use crate::db::{
+    AmountType, Category, RawSepay, UserTransaction, count_transactions, delete_category,
+    insert_category, insert_raw_sepay, insert_user_transaction, select_categories,
+    select_transactions, sum_transaction_amount, update_category, update_transaction,
+};
 use crate::err::{Error, Result};
 use axum::Json;
 use axum::extract::{Query, State};
@@ -214,11 +218,8 @@ pub async fn handle_transaction_list(
             Some(offset),
             Some(limit),
         )?;
-        let total = count_transactions(
-            &mut state.conn,
-            params.from_timestamp,
-            params.to_timestamp,
-        )?;
+        let total =
+            count_transactions(&mut state.conn, params.from_timestamp, params.to_timestamp)?;
 
         return Ok(Json(json!({
             "data": transactions,
@@ -255,6 +256,50 @@ pub async fn handle_transaction_create(
                 source_id: String::from("user"),
             },
         )?;
+
+        return Ok(Json(json!({
+            "success": true,
+        })));
+    }
+
+    Err(Error::DatabaseLock)
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionUpdatePayload {
+    id: String,
+    amount: i32,
+    description: String,
+    date_timestamp: i32,
+}
+
+pub async fn handle_transaction_update(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Json(payload): Json<TransactionUpdatePayload>,
+) -> Result<Json<Value>> {
+    if let Ok(mut state) = state_arc.lock() {
+        let count = update_transaction(
+            &mut state.conn,
+            &UserTransaction {
+                id: Some(payload.id),
+                amount: payload.amount,
+                description: payload.description,
+                date_timestamp: payload.date_timestamp,
+                category_id: None,
+                created_at: None,
+                source_id: String::from("_unavailable"),
+            },
+        )?;
+
+        if count != 1 {
+            return Err(Error::DatabaseDataError {
+                message: format!(
+                    "error happened updating; expected 1 record change; got {}",
+                    count,
+                ),
+            });
+        }
 
         return Ok(Json(json!({
             "success": true,

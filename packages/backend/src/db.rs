@@ -96,6 +96,20 @@ pub fn select_transactions(
     Ok(records)
 }
 
+pub fn update_transaction(conn: &mut SqliteConnection, record: &UserTransaction) -> Result<usize> {
+    use crate::schema::user__transaction::dsl::*;
+
+    Ok(
+        diesel::update(user__transaction.filter(id.eq(record.id.clone())))
+            .set((
+                date_timestamp.eq(record.date_timestamp),
+                description.eq(record.description.clone()),
+                amount.eq(record.amount),
+            ))
+            .execute(conn)?,
+    )
+}
+
 pub fn count_transactions(
     conn: &mut SqliteConnection,
     from_timestamp: Option<i32>,

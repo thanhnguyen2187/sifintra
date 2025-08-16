@@ -55,6 +55,7 @@ async fn main() -> Result<()> {
         .route("/api/v1/stats", get(handle_stats))
         .route("/api/v1/transactions", get(handle_transaction_list))
         .route("/api/v1/transactions", post(handle_transaction_create))
+        .route("/api/v1/transactions", put(handle_transaction_create))
         .route("/api/v1/categories", get(handle_category_list))
         .route("/api/v1/categories", post(handle_category_create))
         .route("/api/v1/categories", put(handle_category_update))
