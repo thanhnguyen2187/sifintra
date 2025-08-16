@@ -10,8 +10,8 @@ use crate::db::establish_connection;
 use crate::err::Result;
 use crate::handlers::{
     handle_category_create, handle_category_delete, handle_category_list, handle_category_update,
-    handle_hook_sepay, handle_stats, handle_transaction_create, handle_transaction_list,
-    handle_transaction_update,
+    handle_hook_sepay, handle_stats, handle_transaction_create, handle_transaction_delete,
+    handle_transaction_list, handle_transaction_update,
 };
 use axum::routing::{delete, put};
 use axum::{
@@ -57,6 +57,7 @@ async fn main() -> Result<()> {
         .route("/api/v1/transactions", get(handle_transaction_list))
         .route("/api/v1/transactions", post(handle_transaction_create))
         .route("/api/v1/transactions", put(handle_transaction_update))
+        .route("/api/v1/transactions", delete(handle_transaction_delete))
         .route("/api/v1/categories", get(handle_category_list))
         .route("/api/v1/categories", post(handle_category_create))
         .route("/api/v1/categories", put(handle_category_update))

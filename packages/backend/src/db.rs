@@ -110,6 +110,12 @@ pub fn update_transaction(conn: &mut SqliteConnection, record: &UserTransaction)
     )
 }
 
+pub fn delete_transaction(conn: &mut SqliteConnection, id_: String) -> Result<usize> {
+    use crate::schema::user__transaction::dsl::*;
+
+    Ok(diesel::delete(user__transaction.filter(id.eq(id_))).execute(conn)?)
+}
+
 pub fn count_transactions(
     conn: &mut SqliteConnection,
     from_timestamp: Option<i32>,
