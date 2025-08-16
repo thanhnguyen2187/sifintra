@@ -1,4 +1,10 @@
-import type { Category, CategoryNoId, Stats, Transaction } from "./types";
+import type {
+  Category,
+  CategoryNoId,
+  Stats,
+  Transaction,
+  TransactionEdit,
+} from "./types";
 
 export type HttpClient = {
   fetchStats({
@@ -30,6 +36,11 @@ export type HttpClient = {
   }: {
     transaction: Transaction & { dateString: string };
     transactionType: "income" | "expense";
+  }): Promise<void>;
+  updateTransaction({
+    transaction,
+  }: {
+    transaction: TransactionEdit;
   }): Promise<void>;
   fetchCategories(): Promise<{
     data: Category[];
@@ -93,6 +104,30 @@ export function createHttpClient(baseUrl: string): HttpClient {
         );
       }
     },
+    async updateTransaction({ transaction }) {
+      const url = new URL("/api/v1/transactions", baseUrl);
+      if (transaction.type === "expense") {
+        transaction.amount = -transaction.amount;
+      }
+      transaction.dateTimestamp = Math.round(
+        new Date(transaction.dateString).getTime() / 1_000,
+      );
+      const payload = JSON.stringify(transaction);
+
+      const resp = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(
+          `Error happened updating transaction; status: ${resp.status}`,
+        );
+      }
+    },
+
     async fetchCategories() {
       const url = new URL("/api/v1/categories", baseUrl);
       const resp = await fetch(url);

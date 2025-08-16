@@ -28,9 +28,16 @@ export function submit() {
       .createTransaction({
         transaction: {
           ...record,
-          dateTimestamp: new Date(record.dateString).getTime() / 1_000,
         },
         transactionType: record.type,
+      })
+      .catch(console.error);
+  } else {
+    httpClient
+      .updateTransaction({
+        transaction: {
+          ...record,
+        },
       })
       .catch(console.error);
   }
