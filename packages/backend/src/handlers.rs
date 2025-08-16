@@ -134,6 +134,14 @@ pub async fn handle_stats(
             None,
             None,
         )?;
+        let categories = select_categories(&mut state.conn)?;
+        let categories_map: HashMap<String, String> =
+            HashMap::from_iter(categories.into_iter().map(|category| {
+                (
+                    category.id.unwrap_or(String::from("_uncategorized")),
+                    category.name,
+                )
+            }));
 
         let mut income = 0;
         let mut expense = 0;
@@ -162,8 +170,12 @@ pub async fn handle_stats(
         }
 
         for (key, value) in expense_grouped {
+            let label = categories_map
+                .get(&key)
+                .unwrap_or(&String::from("_uncategorized"))
+                .clone();
             chart_data.push(json!({
-                "label": key,
+                "label": label,
                 "value": value,
             }));
         }
