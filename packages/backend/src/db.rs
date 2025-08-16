@@ -105,6 +105,7 @@ pub fn update_transaction(conn: &mut SqliteConnection, record: &UserTransaction)
                 date_timestamp.eq(record.date_timestamp),
                 description.eq(record.description.clone()),
                 amount.eq(record.amount),
+                category_id.eq(record.category_id.clone()),
             ))
             .execute(conn)?,
     )

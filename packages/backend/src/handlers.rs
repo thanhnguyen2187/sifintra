@@ -268,6 +268,7 @@ pub struct TransactionUpdatePayload {
     amount: i32,
     description: String,
     date_timestamp: i32,
+    category_id: Option<String>,
 }
 
 pub async fn handle_transaction_update(
@@ -282,7 +283,7 @@ pub async fn handle_transaction_update(
                 amount: payload.amount,
                 description: payload.description,
                 date_timestamp: payload.date_timestamp,
-                category_id: None,
+                category_id: payload.category_id,
                 created_at: None,
                 source_id: String::from("_unavailable"),
             },
