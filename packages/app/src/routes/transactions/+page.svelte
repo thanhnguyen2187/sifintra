@@ -170,7 +170,9 @@ function handlePageActiveChange(value: number) {
                         <button
                             class="btn btn-square"
                             onclick={() => {
-                                httpClient.deleteTransaction({id: record.id ?? ""})
+                                if (confirm("Are you sure? This cannot be reverted!")) {
+                                    httpClient.deleteTransaction({id: record.id ?? ""})
+                                }
                             }}
                         >
                             <TrashIcon />
