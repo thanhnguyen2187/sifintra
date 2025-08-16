@@ -45,10 +45,7 @@ export function submit() {
     bind:this={modal}
 >
     <div class="modal-box w-max">
-        {record.type}
         <fieldset class="fieldset">
-            {typeof record.dateString}
-            {record.dateString}
             <label class="fieldset-label" for="date">Date</label>
             <input
                 class="input"
