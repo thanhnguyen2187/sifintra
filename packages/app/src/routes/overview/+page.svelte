@@ -1,28 +1,33 @@
 <script lang="ts">
 import { Chart } from "chart.js/auto";
-import {
-  endOfMonth,
-  previousMonday,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
-} from "date-fns";
-import { onMount } from "svelte";
+import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { httpClient } from "$lib/default";
 
-let pieChart: HTMLCanvasElement;
+let pieChart: HTMLCanvasElement | undefined = $state(undefined);
 let chart: Chart | undefined;
+let chartState: "idling" | "loading" | "error" = $state("idling");
+
 let totalIncome = $state(0);
 let totalExpense = $state(0);
 let currentBalance = $state(0);
+
 let fromTimestamp: number | undefined = $state(undefined);
 let toTimestamp: number | undefined = $state(undefined);
-// Chart.register(PieController, ArcElement);
 
 $effect(() => {
   (async () => {
-    const stats = await httpClient.fetchStats({ fromTimestamp, toTimestamp });
+    chartState = "loading";
+    const stats = await httpClient
+      .fetchStats({ fromTimestamp, toTimestamp })
+      .catch((err) => {
+        chartState = "error";
+        console.error(err);
+      });
+    if (!stats) {
+      return;
+    }
 
+    chartState = "idling";
     const labels = stats.data.chartData.map((record) =>
       record.label === "_uncategorized" ? "Uncategorized" : record.label,
     );
@@ -40,7 +45,11 @@ $effect(() => {
     if (chart) {
       chart.destroy();
     }
-    chart = new Chart(pieChart, {
+    if (chart === undefined) {
+      return;
+    }
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    chart = new Chart(pieChart!, {
       type: "pie",
       data: {
         labels,
@@ -98,6 +107,23 @@ function handleDateFilterButton(
 }
 </script>
 
+{#snippet chartSnippet()}
+    {#if chartState === "idling"}
+        <canvas
+            bind:this={pieChart}
+            class="max-h-[40em] pt-2"
+        ></canvas>
+    {:else if chartState === "loading"}
+        <p>
+            Loading...
+        </p>
+    {:else if chartState === "error"}
+        <p>
+            Error happened loading chart. Please try again later.
+        </p>
+    {/if}
+{/snippet}
+
 <div class="flex flex-col gap-4">
     <span class="font-bold text-xl">Overview</span>
     <div class="join">
@@ -126,10 +152,7 @@ function handleDateFilterButton(
             All time
         </button>
     </div>
-    <canvas
-        bind:this={pieChart}
-        class="max-h-[40em] pt-2"
-    ></canvas>
+    {@render chartSnippet()}
     <table class="table">
         <thead>
         <tr>
