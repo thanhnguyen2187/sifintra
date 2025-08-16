@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-export function formatDateLocal(timestamp: number): string {
+export function formatDateDb(timestamp: number): string {
   return format(new Date(timestamp * 1_000), "yyyy-MM-dd'T'HH:mm");
 }
 

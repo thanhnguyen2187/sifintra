@@ -6,7 +6,7 @@ import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { onMount } from "svelte";
 // biome-ignore lint/style/useImportType: false positive
 import Toaster from "$lib/components/Toaster.svelte";
-import { formatDateDisplay } from "$lib/date";
+import { formatDateDb, formatDateDisplay } from "$lib/date";
 import { httpClient } from "$lib/default";
 import {
   type Category,
@@ -140,6 +140,26 @@ function handleDelete(id: string) {
       });
   }
 }
+
+function handleCategoryChange(e: Event, record: TransactionDisplay) {
+  const target = e.target as HTMLSelectElement;
+  const categoryId = target.value ? target.value : null;
+  httpClient
+    .updateTransaction({
+      transaction: {
+        ...record,
+        dateString: formatDateDb(record.dateTimestamp),
+        categoryId,
+      },
+    })
+    .then(() => {
+      toaster.setMessageSuccess("Categorized transaction!");
+    })
+    .catch((err) => {
+      console.error(err);
+      toaster.setMessageError("Error happened categorizing.");
+    });
+}
 </script>
 
 <div class="flex flex-col gap-4">
@@ -189,7 +209,11 @@ function handleDelete(id: string) {
                 <td>{record.amount}</td>
                 <td>{record.type}</td>
                 <td>
-                    <select class="select" bind:value={record.categoryId}>
+                    <select
+                        class="select"
+                        bind:value={record.categoryId}
+                        onchange={(e) => handleCategoryChange(e, record)}
+                    >
                         <option value={null}>Uncategorized</option>
                         {#each categories as category}
                             <option value={category.id}>{category.name}</option>
