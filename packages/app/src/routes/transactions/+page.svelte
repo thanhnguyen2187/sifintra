@@ -85,6 +85,10 @@ function handleDateFilterButton(
     }
   }
 }
+
+function handlePageActiveChange(value: number) {
+  pageActive = value;
+}
 </script>
 
 <div class="flex flex-col gap-4">
@@ -148,7 +152,12 @@ function handleDateFilterButton(
             <td colspan="4">
                 <div class="join">
                     {#each pagesDisplay as pageDisplay}
-                        <button class="join-item btn">{pageDisplay}</button>
+                        <button
+                            class="join-item btn"
+                            onclick={() => handlePageActiveChange(pageDisplay)}
+                        >
+                            {pageDisplay}
+                        </button>
                     {/each}
                 </div>
             </td>
