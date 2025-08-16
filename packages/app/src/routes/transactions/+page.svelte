@@ -1,9 +1,17 @@
 <script lang="ts">
+import EditIcon from "virtual:icons/mynaui/edit-solid";
 import PlusIcon from "virtual:icons/mynaui/plus-solid";
+import TrashIcon from "virtual:icons/mynaui/trash-solid";
 import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { onMount } from "svelte";
+import { formatDateDisplay } from "$lib/date";
 import { httpClient } from "$lib/default";
-import type { Category, Transaction } from "$lib/types";
+import {
+  type Category,
+  createTransactionEdit,
+  createTransactionEmpty,
+  type Transaction,
+} from "$lib/types";
 // biome-ignore lint/style/useImportType: false positive
 import EditModal from "./EditModal.svelte";
 
@@ -37,9 +45,7 @@ $effect(() => {
     });
     records = response.data.map((transaction) => ({
       ...transaction,
-      date: new Date(transaction.dateTimestamp * 1_000).toLocaleDateString(
-        "vi-vn",
-      ),
+      date: formatDateDisplay(transaction.dateTimestamp),
       amount: Math.abs(transaction.amount),
       type: transaction.amount > 0 ? "income" : "expense",
     }));
@@ -131,6 +137,7 @@ function handlePageActiveChange(value: number) {
             <th>Amount</th>
             <th>Type</th>
             <th>Category</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -148,10 +155,25 @@ function handlePageActiveChange(value: number) {
                         {/each}
                     </select>
                 </td>
+                <td>
+                    <button
+                        class="btn"
+                        onclick={() => {
+                            const recordEdit = createTransactionEdit(record);
+                            editModal.setRecord(recordEdit);
+                            editModal.show();
+                        }}
+                    >
+                        <EditIcon />
+                    </button>
+                    <button class="btn">
+                        <TrashIcon />
+                    </button>
+                </td>
             </tr>
         {:else}
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     No data yet.
                 </td>
             </tr>
@@ -159,7 +181,7 @@ function handlePageActiveChange(value: number) {
         </tbody>
         <tfoot>
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 <div class="flex justify-between">
                     <div class="join">
                         {#each pagesDisplay as pageDisplay}
@@ -174,6 +196,7 @@ function handlePageActiveChange(value: number) {
                     <button
                         class="btn"
                         onclick={() => {
+                            editModal.setRecord(createTransactionEmpty());
                             editModal.show();
                         }}
                     >

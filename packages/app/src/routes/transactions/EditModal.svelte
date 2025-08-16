@@ -1,24 +1,22 @@
 <script lang="ts">
 import SaveIcon from "virtual:icons/mynaui/save-solid";
 import { httpClient } from "$lib/default";
-import type { Transaction } from "$lib/types";
+import type { Transaction, TransactionEdit } from "$lib/types";
 
 let modal: HTMLDialogElement;
-type TransactionEdit = Omit<
-  Transaction & {
-    dateString: string;
-    type: "income" | "expense";
-  },
-  "dateTimestamp"
->;
 let record: TransactionEdit = $state({
   id: null,
   amount: 10_000,
   type: "expense",
   categoryId: null,
+  dateTimestamp: 0,
   dateString: "",
   description: "",
 });
+
+export function setRecord(value: TransactionEdit) {
+  record = value;
+}
 
 export function show() {
   modal.showModal();

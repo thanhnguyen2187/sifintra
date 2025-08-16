@@ -28,7 +28,7 @@ export type HttpClient = {
     transaction,
     transactionType,
   }: {
-    transaction: Transaction;
+    transaction: Transaction & { dateString: string };
     transactionType: "income" | "expense";
   }): Promise<void>;
   fetchCategories(): Promise<{
@@ -75,6 +75,9 @@ export function createHttpClient(baseUrl: string): HttpClient {
       if (transactionType === "expense") {
         transaction.amount = -transaction.amount;
       }
+      transaction.dateTimestamp = Math.round(
+        new Date(transaction.dateString).getTime() / 1_000,
+      );
       const payload = JSON.stringify(transaction);
 
       const resp = await fetch(url, {
