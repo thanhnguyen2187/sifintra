@@ -37,10 +37,19 @@ export function createHttpClient(baseUrl: string): HttpClient {
       return respJson;
     },
     async fetchTransactions() {
-      throw new Error("unimplemented");
+      const url = new URL("/api/v1/transactions", baseUrl);
+      const resp = await fetch(url);
+      const respJson = (await resp.json()) as {
+        data: Transaction[];
+        total: number;
+      };
+      return respJson;
     },
     async fetchCategories() {
-      throw new Error("unimplemented");
+      const url = new URL("/api/v1/categories", baseUrl);
+      const resp = await fetch(url);
+      const respJson = (await resp.json()) as { data: Category[] };
+      return respJson;
     },
     async createCategory() {
       throw new Error("unimplemented");
