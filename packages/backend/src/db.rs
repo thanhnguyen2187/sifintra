@@ -203,6 +203,7 @@ pub struct UserTransaction {
 #[derive(Queryable, Selectable, Insertable, Serialize)]
 #[diesel(table_name = crate::schema::user__category)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[serde(rename_all = "camelCase")]
 pub struct Category {
     pub id: Option<String>,
     pub name: String,
