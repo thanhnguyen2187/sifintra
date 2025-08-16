@@ -6,6 +6,7 @@ export type Stats = {
 };
 
 export type Transaction = {
+  id: string | null;
   dateTimestamp: number;
   description: string;
   amount: number;

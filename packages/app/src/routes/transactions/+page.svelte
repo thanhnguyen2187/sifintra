@@ -1,8 +1,11 @@
 <script lang="ts">
+import PlusIcon from "virtual:icons/mynaui/plus-solid";
 import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { onMount } from "svelte";
 import { httpClient } from "$lib/default";
 import type { Category, Transaction } from "$lib/types";
+// biome-ignore lint/style/useImportType: false positive
+import EditModal from "./EditModal.svelte";
 
 type TransactionDisplay = Transaction & {
   type: "expense" | "income";
@@ -11,6 +14,7 @@ type TransactionDisplay = Transaction & {
 
 let records: TransactionDisplay[] = $state([]);
 let categories: Category[] = $state([]);
+let editModal: EditModal;
 
 onMount(() => {
   (async () => {
@@ -145,20 +149,37 @@ function handlePageActiveChange(value: number) {
                     </select>
                 </td>
             </tr>
+        {:else}
+            <tr>
+                <td colspan="5">
+                    No data yet.
+                </td>
+            </tr>
         {/each}
         </tbody>
         <tfoot>
         <tr>
-            <td colspan="4">
-                <div class="join">
-                    {#each pagesDisplay as pageDisplay}
-                        <button
-                            class="join-item btn"
-                            onclick={() => handlePageActiveChange(pageDisplay)}
-                        >
-                            {pageDisplay}
-                        </button>
-                    {/each}
+            <td colspan="5">
+                <div class="flex justify-between">
+                    <div class="join">
+                        {#each pagesDisplay as pageDisplay}
+                            <button
+                                class="join-item btn"
+                                onclick={() => handlePageActiveChange(pageDisplay)}
+                            >
+                                {pageDisplay}
+                            </button>
+                        {/each}
+                    </div>
+                    <button
+                        class="btn"
+                        onclick={() => {
+                            editModal.show();
+                        }}
+                    >
+                        <PlusIcon />
+                        Add
+                    </button>
                 </div>
             </td>
         </tr>
@@ -167,3 +188,5 @@ function handlePageActiveChange(value: number) {
 
     <a class="underline" href="/">Back</a>
 </div>
+
+<EditModal bind:this={editModal} />

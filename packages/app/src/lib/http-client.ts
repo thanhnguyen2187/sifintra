@@ -24,6 +24,13 @@ export type HttpClient = {
     data: Transaction[];
     total: number;
   }>;
+  createTransaction({
+    transaction,
+    transactionType,
+  }: {
+    transaction: Transaction;
+    transactionType: "income" | "expense";
+  }): Promise<void>;
   fetchCategories(): Promise<{
     data: Category[];
   }>;
@@ -62,6 +69,26 @@ export function createHttpClient(baseUrl: string): HttpClient {
         total: number;
       };
       return respJson;
+    },
+    async createTransaction({ transaction, transactionType }) {
+      const url = new URL("/api/v1/transactions", baseUrl);
+      if (transactionType === "expense") {
+        transaction.amount = -transaction.amount;
+      }
+      const payload = JSON.stringify(transaction);
+
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(
+          `Error happened creating transaction; status: ${resp.status}`,
+        );
+      }
     },
     async fetchCategories() {
       const url = new URL("/api/v1/categories", baseUrl);

@@ -60,7 +60,12 @@ async fn main() -> Result<()> {
         .route("/api/v1/categories", put(handle_category_update))
         .route("/api/v1/categories", delete(handle_category_delete))
         .fallback(frontend::static_handler)
-        .layer(CorsLayer::new().allow_methods(Any).allow_origin(Any))
+        .layer(
+            CorsLayer::new()
+                .allow_methods(Any)
+                .allow_origin(Any)
+                .allow_headers(Any),
+        )
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
