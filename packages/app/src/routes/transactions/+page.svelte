@@ -4,6 +4,8 @@ import PlusIcon from "virtual:icons/mynaui/plus-solid";
 import TrashIcon from "virtual:icons/mynaui/trash-solid";
 import { endOfMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { onMount } from "svelte";
+// biome-ignore lint/style/useImportType: false positive
+import Toaster from "$lib/components/Toaster.svelte";
 import { formatDateDisplay } from "$lib/date";
 import { httpClient } from "$lib/default";
 import {
@@ -22,7 +24,9 @@ type TransactionDisplay = Transaction & {
 
 let records: TransactionDisplay[] = $state([]);
 let categories: Category[] = $state([]);
+
 let editModal: EditModal;
+let toaster: Toaster;
 
 onMount(() => {
   (async () => {
@@ -36,21 +40,12 @@ const limit = 10;
 let pageActive = $state(1);
 
 $effect(() => {
-  (async () => {
-    const response = await httpClient.fetchTransactions({
-      fromTimestamp,
-      toTimestamp,
-      page: pageActive,
-      limit,
-    });
-    records = response.data.map((transaction) => ({
-      ...transaction,
-      date: formatDateDisplay(transaction.dateTimestamp),
-      amount: Math.abs(transaction.amount),
-      type: transaction.amount > 0 ? "income" : "expense",
-    }));
-    total = response.total;
-  })();
+  populateTransactions({
+    fromTimestamp,
+    toTimestamp,
+    page: pageActive,
+    limit,
+  });
 });
 
 let total = $state(0);
@@ -63,13 +58,39 @@ let pagesDisplay = $derived.by(() => {
   return result;
 });
 
+async function populateTransactions({
+  fromTimestamp,
+  toTimestamp,
+  page,
+  limit,
+}: {
+  fromTimestamp: number | undefined;
+  toTimestamp: number | undefined;
+  page: number;
+  limit: number;
+}) {
+  const response = await httpClient.fetchTransactions({
+    fromTimestamp,
+    toTimestamp,
+    page,
+    limit,
+  });
+  records = response.data.map((transaction) => ({
+    ...transaction,
+    date: formatDateDisplay(transaction.dateTimestamp),
+    amount: Math.abs(transaction.amount),
+    type: transaction.amount > 0 ? "income" : "expense",
+  }));
+  total = response.total;
+}
+
 function handleDateFilterButton(
   buttonType: "this-week" | "this-month" | "last-month" | "all-time",
 ) {
   const dateCurrent = new Date();
   switch (buttonType) {
     case "this-week": {
-      const dateWeekStart = startOfWeek(dateCurrent);
+      const dateWeekStart = startOfWeek(dateCurrent, { weekStartsOn: 1 });
       fromTimestamp = dateWeekStart.getTime() / 1_000;
       toTimestamp = dateCurrent.getTime() / 1_000;
       break;
@@ -98,6 +119,26 @@ function handleDateFilterButton(
 
 function handlePageActiveChange(value: number) {
   pageActive = value;
+}
+
+function handleDelete(id: string) {
+  if (confirm("Are you sure? This cannot be reverted!")) {
+    httpClient
+      .deleteTransaction({ id })
+      .then(() => {
+        toaster.setMessageSuccess("Deleted!");
+        populateTransactions({
+          fromTimestamp,
+          toTimestamp,
+          page: pageActive,
+          limit,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        toaster.setMessageError("Error happened deleting.");
+      });
+  }
 }
 </script>
 
@@ -169,11 +210,7 @@ function handlePageActiveChange(value: number) {
                         </button>
                         <button
                             class="btn btn-square"
-                            onclick={() => {
-                                if (confirm("Are you sure? This cannot be reverted!")) {
-                                    httpClient.deleteTransaction({id: record.id ?? ""})
-                                }
-                            }}
+                            onclick={() => handleDelete(record.id ?? "")}
                         >
                             <TrashIcon />
                         </button>
@@ -221,4 +258,20 @@ function handlePageActiveChange(value: number) {
     <a class="underline" href="/">Back</a>
 </div>
 
-<EditModal bind:this={editModal} />
+<EditModal
+    bind:this={editModal}
+    onSuccess={() => {
+        toaster.setMessageSuccess("Succeeded!");
+        populateTransactions({
+            fromTimestamp,
+            toTimestamp,
+            page: pageActive,
+            limit,
+        });
+        editModal.hide();
+    }}
+    onFailure={() => {
+        toaster.setMessageError("Error happened!");
+    }}
+/>
+<Toaster bind:this={toaster} />

@@ -1,7 +1,7 @@
 <script lang="ts">
 import SaveIcon from "virtual:icons/mynaui/save-solid";
 import { httpClient } from "$lib/default";
-import type { Transaction, TransactionEdit } from "$lib/types";
+import type { TransactionEdit } from "$lib/types";
 
 let modal: HTMLDialogElement;
 let record: TransactionEdit = $state({
@@ -13,6 +13,13 @@ let record: TransactionEdit = $state({
   dateString: "",
   description: "",
 });
+let {
+  onSuccess,
+  onFailure,
+}: {
+  onSuccess: () => void;
+  onFailure: () => void;
+} = $props();
 
 export function setRecord(value: TransactionEdit) {
   record = value;
@@ -20,6 +27,10 @@ export function setRecord(value: TransactionEdit) {
 
 export function show() {
   modal.showModal();
+}
+
+export function hide() {
+  modal.close();
 }
 
 export function submit() {
@@ -31,7 +42,11 @@ export function submit() {
         },
         transactionType: record.type,
       })
-      .catch(console.error);
+      .then(onSuccess)
+      .catch((err) => {
+        console.error(err);
+        onFailure();
+      });
   } else {
     httpClient
       .updateTransaction({
@@ -39,7 +54,11 @@ export function submit() {
           ...record,
         },
       })
-      .catch(console.error);
+      .then(onSuccess)
+      .catch((err) => {
+        console.error(err);
+        onFailure();
+      });
   }
 }
 </script>
