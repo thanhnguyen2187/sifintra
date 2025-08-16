@@ -207,16 +207,16 @@ pub async fn handle_transaction_list(
     State(state_arc): State<Arc<Mutex<AppState>>>,
 ) -> Result<Json<Value>> {
     if let Ok(mut state) = state_arc.lock() {
-        let offset = params.page.and_then(|page| {
-            let limit = params.limit?;
-            Some(page * limit)
-        });
+        let limit = params.limit.unwrap_or(10);
+        let page = params.page.unwrap_or(1);
+
+        let offset = (page - 1) * limit;
         let transactions = select_transactions(
             &mut state.conn,
             params.from_timestamp,
             params.to_timestamp,
-            offset,
-            params.limit,
+            Some(offset),
+            Some(limit),
         )?;
 
         return Ok(Json(json!({
