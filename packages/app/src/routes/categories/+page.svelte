@@ -2,40 +2,20 @@
 import EditIcon from "virtual:icons/mynaui/edit-solid";
 import PlusIcon from "virtual:icons/mynaui/plus-solid";
 import TrashIcon from "virtual:icons/mynaui/trash-solid";
+import { onMount } from "svelte";
+import { httpClient } from "$lib/default";
+import type { Category } from "$lib/types";
 
-type Category = {
-  id: string;
-  name: string;
-  dateCreated: string;
-  dateModified: string;
-};
+let records: Category[] = $state([]);
 
-const records: Category[] = [
-  {
-    id: "",
-    name: "Others",
-    dateCreated: "2024-07-31 17:55",
-    dateModified: "2024-07-31 17:55",
-  },
-  {
-    id: "",
-    name: "Cats",
-    dateCreated: "2024-07-31 17:55",
-    dateModified: "2024-07-31 17:55",
-  },
-  {
-    id: "",
-    name: "Transportation",
-    dateCreated: "2024-07-31 17:55",
-    dateModified: "2024-07-31 17:55",
-  },
-  {
-    id: "",
-    name: "Food",
-    dateCreated: "2024-07-31 17:55",
-    dateModified: "2024-07-31 17:55",
-  },
-];
+async function populateRecords() {
+  const resp = await httpClient.fetchCategories();
+  records = resp.data;
+}
+
+onMount(() => {
+  populateRecords().then();
+});
 </script>
 
 <div class="flex flex-col gap-4">
@@ -61,14 +41,18 @@ const records: Category[] = [
                         <TrashIcon />
                     </button>
                 </td>
-                <td>{record.dateModified}</td>
-                <td>{record.dateCreated}</td>
+                <td>{record.updatedAt}</td>
+                <td>{record.createdAt}</td>
+            </tr>
+        {:else}
+            <tr>
+                <td colspan="4">No data yet.</td>
             </tr>
         {/each}
         </tbody>
         <tfoot>
         <tr>
-            <td class="text-center" colspan="4">
+            <td class="text-right" colspan="4">
                 <button class="btn">
                     <PlusIcon />
                     Add
