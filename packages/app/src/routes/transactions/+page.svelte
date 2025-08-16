@@ -156,19 +156,26 @@ function handlePageActiveChange(value: number) {
                     </select>
                 </td>
                 <td>
-                    <button
-                        class="btn"
-                        onclick={() => {
-                            const recordEdit = createTransactionEdit(record);
-                            editModal.setRecord(recordEdit);
-                            editModal.show();
-                        }}
-                    >
-                        <EditIcon />
-                    </button>
-                    <button class="btn">
-                        <TrashIcon />
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            class="btn btn-square"
+                            onclick={() => {
+                                const recordEdit = createTransactionEdit(record);
+                                editModal.setRecord(recordEdit);
+                                editModal.show();
+                            }}
+                        >
+                            <EditIcon />
+                        </button>
+                        <button
+                            class="btn btn-square"
+                            onclick={() => {
+                                httpClient.deleteTransaction({id: record.id ?? ""})
+                            }}
+                        >
+                            <TrashIcon />
+                        </button>
+                    </div>
                 </td>
             </tr>
         {:else}

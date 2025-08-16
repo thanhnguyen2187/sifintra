@@ -42,6 +42,7 @@ export type HttpClient = {
   }: {
     transaction: TransactionEdit;
   }): Promise<void>;
+  deleteTransaction({ id }: { id: string }): Promise<void>;
   fetchCategories(): Promise<{
     data: Category[];
   }>;
@@ -124,6 +125,22 @@ export function createHttpClient(baseUrl: string): HttpClient {
       if (!resp.ok) {
         throw new Error(
           `Error happened updating transaction; status: ${resp.status}`,
+        );
+      }
+    },
+    async deleteTransaction({ id }) {
+      const url = new URL("/api/v1/transactions", baseUrl);
+      const payload = JSON.stringify({ id });
+      const resp = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(
+          `Error happened deleting transaction; status: ${resp.status}`,
         );
       }
     },
