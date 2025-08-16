@@ -10,7 +10,17 @@ export type HttpClient = {
   }): Promise<{
     data: Stats;
   }>;
-  fetchTransactions(): Promise<{
+  fetchTransactions({
+    page,
+    limit,
+    fromTimestamp,
+    toTimestamp,
+  }: {
+    fromTimestamp?: number;
+    toTimestamp?: number;
+    page: number;
+    limit: number;
+  }): Promise<{
     data: Transaction[];
     total: number;
   }>;
@@ -36,8 +46,16 @@ export function createHttpClient(baseUrl: string): HttpClient {
       const respJson = (await resp.json()) as { data: Stats };
       return respJson;
     },
-    async fetchTransactions() {
+    async fetchTransactions({ fromTimestamp, toTimestamp, page, limit }) {
       const url = new URL("/api/v1/transactions", baseUrl);
+      if (fromTimestamp) {
+        url.searchParams.set("from-timestamp", fromTimestamp.toFixed());
+      }
+      if (toTimestamp) {
+        url.searchParams.set("to-timestamp", toTimestamp.toFixed());
+      }
+      url.searchParams.set("page", page.toString());
+      url.searchParams.set("limit", limit.toString());
       const resp = await fetch(url);
       const respJson = (await resp.json()) as {
         data: Transaction[];
