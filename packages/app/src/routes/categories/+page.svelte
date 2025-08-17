@@ -24,6 +24,11 @@ function handleAdd() {
   modal.show();
 }
 
+function handleEdit(record: Category) {
+  modal.setRecord({ ...record });
+  modal.show();
+}
+
 onMount(() => {
   populateRecords().then();
 });
@@ -45,7 +50,10 @@ onMount(() => {
             <tr>
                 <td>{record.name}</td>
                 <td>
-                    <button class="btn">
+                    <button
+                        class="btn"
+                        onclick={() => handleEdit(record)}
+                    >
                         <EditIcon />
                     </button>
                     <button class="btn">

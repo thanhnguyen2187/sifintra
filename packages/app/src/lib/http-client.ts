@@ -165,8 +165,19 @@ export function createHttpClient(baseUrl: string): HttpClient {
         throw new Error(`Error happened creating; status: ${resp.status}`);
       }
     },
-    async updateCategory() {
-      throw new Error("unimplemented");
+    async updateCategory(category) {
+      const url = new URL("/api/v1/categories", baseUrl);
+      const payload = JSON.stringify(category);
+      const resp = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(`Error happened updating; status: ${resp.status}`);
+      }
     },
     async deleteCategory() {
       throw new Error("unimplemented");
