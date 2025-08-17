@@ -5,7 +5,7 @@ tasks:
   build:
     command: 'cargo build --release'
     deps:
-      - 'frontend:build'
+      - 'app:build'
 
   serve:
     command: 'cargo run'

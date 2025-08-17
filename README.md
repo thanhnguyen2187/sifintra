@@ -23,12 +23,20 @@ cargo install diesel_cli \
 
 export PATH=$PATH:/home/thanh/.cargo/bin
 
+diesel --version
 # diesel
 #  Version: 2.2.12
 #  Supported Backends: sqlite
 ```
 
-- Run migrations
+- Make sure that `packages/backend/.env` is ready with `DATABASE_URL`
+  points to a valid SQLite3 database file:
+
+```shell
+DATABASE_URL=sifintra.db
+```
+
+- Run migrations:
 
 ```shell
 diesel setup
@@ -59,11 +67,11 @@ pnpm --version
 - Install dependencies:
 
 ```shell
-pnpm install
+moon 
 ```
 
-- Make sure that `.env` is ready with `PUBLIC_API_BASE_URL` points to the
-  backend development endpoint:
+- Make sure that `packages/app/.env` is ready with `PUBLIC_API_BASE_URL` points
+  to the backend development endpoint:
 
 ```
 PUBLIC_API_BASE_URL=http://localhost:3000
