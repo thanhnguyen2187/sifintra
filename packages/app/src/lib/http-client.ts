@@ -179,8 +179,19 @@ export function createHttpClient(baseUrl: string): HttpClient {
         throw new Error(`Error happened updating; status: ${resp.status}`);
       }
     },
-    async deleteCategory() {
-      throw new Error("unimplemented");
+    async deleteCategory({ id }) {
+      const url = new URL("/api/v1/categories", baseUrl);
+      const payload = JSON.stringify({ id });
+      const resp = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if (!resp.ok) {
+        throw new Error(`Error happened deleting; status: ${resp.status}`);
+      }
     },
   };
 }

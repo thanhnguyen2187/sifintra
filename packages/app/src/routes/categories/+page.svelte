@@ -29,6 +29,21 @@ function handleEdit(record: Category) {
   modal.show();
 }
 
+function handleDelete(id: string) {
+  if (confirm("Are you sure? This cannot be reverted.")) {
+    httpClient
+      .deleteCategory({ id })
+      .then(() => {
+        toaster.setMessageSuccess("Deleted successfully.");
+        populateRecords();
+      })
+      .catch((err) => {
+        console.error(err);
+        toaster.setMessageError("Error happened deleting.");
+      });
+  }
+}
+
 onMount(() => {
   populateRecords().then();
 });
@@ -56,7 +71,10 @@ onMount(() => {
                     >
                         <EditIcon />
                     </button>
-                    <button class="btn">
+                    <button
+                        class="btn"
+                        onclick={() => handleDelete(record.id)}
+                    >
                         <TrashIcon />
                     </button>
                 </td>
