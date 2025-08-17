@@ -1,5 +1,6 @@
 mod app_state;
 mod db;
+mod db_migration;
 mod err;
 mod frontend;
 mod handlers;
@@ -7,6 +8,7 @@ mod schema;
 
 use crate::app_state::AppState;
 use crate::db::establish_connection;
+use crate::db_migration::run_migrations;
 use crate::err::Result;
 use crate::handlers::{
     handle_category_create, handle_category_delete, handle_category_list, handle_category_update,
@@ -48,7 +50,10 @@ async fn main() -> Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let conn = establish_connection()?;
+    let mut conn = establish_connection()?;
+    run_migrations(&mut conn);
+    info!("Ran database migrations");
+
     let shared_state = Arc::new(Mutex::new(AppState { conn }));
     let app = Router::new()
         .route("/api/v1/health", get(async || "alive!"))
@@ -71,7 +76,10 @@ async fn main() -> Result<()> {
         )
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+
+    let host = std::env::var("HOST").unwrap_or(String::from("127.0.0.1"));
+    let port = std::env::var("PORT").unwrap_or(String::from("3000"));
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port)).await?;
 
     info!("Listening on http://127.0.0.1:3000");
     axum::serve(listener, app).await?;
