@@ -1,4 +1,5 @@
-import { format } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
+import { formatDateDisplay } from "$lib/date";
 
 export type Stats = {
   totalIncomeVND: number;
@@ -28,6 +29,11 @@ export type Category = {
 };
 
 export type CategoryEdit = { id: string | null; name: string };
+
+export type CategoryDisplay = Category & {
+  createdAtCorrected: string;
+  updatedAtCorrected: string;
+};
 
 export function createTransactionEmpty(): TransactionEdit {
   return {
@@ -59,5 +65,29 @@ export function createCategoryEmpty(): CategoryEdit {
   return {
     id: null,
     name: "",
+  };
+}
+
+export function createCategoryDisplay(category: Category): CategoryDisplay {
+  const createdAtParsed = parse(
+    `${category.createdAt}Z`,
+    "yyyy-MM-dd HH:mm:ssX",
+    new Date(),
+  );
+  const createdAtCorrected = formatDateDisplay(
+    createdAtParsed.getTime() / 1_000,
+  );
+  const updatedAtParsed = parse(
+    `${category.updatedAt}Z`,
+    "yyyy-MM-dd HH:mm:ssX",
+    new Date(),
+  );
+  const updatedAtCorrected = formatDateDisplay(
+    updatedAtParsed.getTime() / 1_000,
+  );
+  return {
+    ...category,
+    createdAtCorrected,
+    updatedAtCorrected,
   };
 }

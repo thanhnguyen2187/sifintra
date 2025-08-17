@@ -6,17 +6,22 @@ import TrashIcon from "virtual:icons/mynaui/trash-solid";
 import { onMount } from "svelte";
 import Toaster from "$lib/components/Toaster.svelte";
 import { httpClient } from "$lib/default";
-import { type Category, createCategoryEmpty } from "$lib/types";
+import {
+  type Category,
+  type CategoryDisplay,
+  createCategoryEmpty,
+} from "$lib/types";
+import { createCategoryDisplay } from "$lib/types.js";
 import EditModal from "./EditModal.svelte";
 
 let modal: EditModal;
 let toaster: Toaster;
 
-let records: Category[] = $state([]);
+let records: CategoryDisplay[] = $state([]);
 
 async function populateRecords() {
   const resp = await httpClient.fetchCategories();
-  records = resp.data;
+  records = resp.data.map(createCategoryDisplay);
 }
 
 function handleAdd() {
@@ -78,8 +83,8 @@ onMount(() => {
                         <TrashIcon />
                     </button>
                 </td>
-                <td>{record.updatedAt}</td>
-                <td>{record.createdAt}</td>
+                <td>{record.updatedAtCorrected}</td>
+                <td>{record.createdAtCorrected}</td>
             </tr>
         {:else}
             <tr>
