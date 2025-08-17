@@ -51,7 +51,7 @@ export type HttpClient = {
   deleteCategory({ id }: { id: string }): Promise<void>;
 };
 
-export function createHttpClient(baseUrl: string): HttpClient {
+export function createHttpClient(baseUrl: string | undefined): HttpClient {
   return {
     async fetchStats({ fromTimestamp, toTimestamp }) {
       const url = new URL("/api/v1/stats", baseUrl);
