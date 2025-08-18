@@ -1,7 +1,8 @@
 FROM ubuntu:24.04 AS builder
 
 # Install NodeJS
-RUN apt update -y &&  apt install -y gpg  wget curl build-essential
+RUN apt update -y \
+    && apt install -y gpg wget curl build-essential
 RUN install -dm 755 /etc/apt/keyrings
 RUN wget -qO - https://mise.jdx.dev/gpg-key.pub | gpg --dearmor |  tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null
 RUN echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" |  tee /etc/apt/sources.list.d/mise.list
@@ -21,12 +22,19 @@ ENV PATH="/root/.cargo/bin:$PATH"
 WORKDIR /app
 COPY . .
 
-# RUN echo "PUBLIC_BASE_API_URL=" > /app/packages/app/.env.production
 ENV PUBLIC_BASE_API_URL=""
-RUN cd /app/packages/app && pnpm install && pnpm run build
-RUN cd /app/packages/backend && cargo build --release
+RUN cd /app/packages/app \
+    && pnpm install \
+    && pnpm run build
+RUN cd /app/packages/backend \
+    && cargo build --release
 
 RUN mkdir -p /data && touch /data/sifintra.db
+
+FROM gcr.io/distroless/cc-debian12
+COPY --from=builder /app/packages/backend/target/release/backend /app/backend
+COPY --from=builder /data /data
+
 ENV DATABASE_URL="/data/sifintra.db"
 ENV HOST="0.0.0.0"
-CMD ["/app/packages/backend/target/release/backend"]
+ENTRYPOINT ["/app/backend"]

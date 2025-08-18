@@ -4,6 +4,8 @@
 Dockerfile
 .dockerignore
 .gitignore
+*.db
+scratch.sh
 
 packages/app/node_modules/
 packages/app/build/
