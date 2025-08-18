@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
     let port = std::env::var("PORT").unwrap_or(String::from("3000"));
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port)).await?;
 
-    info!("Listening on http://127.0.0.1:3000");
+    info!("Listening on http://{}:{}", host, port);
     axum::serve(listener, app).await?;
     Ok(())
 }
