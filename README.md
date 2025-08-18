@@ -5,19 +5,19 @@ Simple Finance Tracker.
 ## Screenshots
 
 <details>
-  <summary>`/overview`</summary>
+  <summary><code>/overview</code></summary>
 
   ![overview](screenshots/overview.png)
 </details>
 
 <details>
-  <summary>`/transactions`</summary>
+  <summary><code>/transactions</code></summary>
 
   ![overview](screenshots/transactions.png)
 </details>
 
 <details>
-  <summary>`/categories`</summary>
+  <summary><code>/categories</code></summary>
 
   ![overview](screenshots/categories.png)
 </details>
@@ -140,3 +140,28 @@ docker run \
     thanhnguyen2187/sifintra:latest \
 ;
 ```
+
+## Deployment
+
+- SePay integration:
+
+Make sure that you have a Sepay account available, and you are able to visit
+https://my.sepay.vn/webhooks.
+
+<details>
+  <summary>Image 1</summary>
+
+  ![](screenshots/sepay-1.png)
+</details>
+
+Click on the blue button to add a new webhook. Make sure that the application is
+available publicly. For example, let's say the home page is reachable at
+`https://sifintra.deployed.domain`, then we can use the endpoint POST
+`https://sifintra.deployed.domain/api/v1/hooks/sepay` to receive Sepay's hook.
+
+<details>
+  <summary>Image 2</summary>
+
+  ![](screenshots/sepay-2.png)
+</details>
+
