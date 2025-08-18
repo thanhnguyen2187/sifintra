@@ -1,0 +1,10 @@
+*.md
+*.env
+.idea/
+Dockerfile
+.dockerignore
+.gitignore
+
+packages/app/node_modules/
+packages/app/build/
+packages/backend/target/

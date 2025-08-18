@@ -90,4 +90,18 @@ pnpm run dev
 
 ## Production Build
 
-TBA
+- Make sure that `docker` is available:
+
+```shell
+docker build -t thanhnguyen2187/sifintra:latest .
+```
+
+- Run the built Docker image with data stored at `/tmp/data`:
+
+```shell
+docker run \
+    -p 3000:3000 \
+    -v /tmp/data:/data \
+    thanhnguyen2187/sifintra:latest \
+;
+```
