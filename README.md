@@ -2,13 +2,48 @@
 
 Simple Finance Tracker.
 
+## Screenshots
+
+<details>
+  <summary>`/overview`</summary>
+
+  ![overview](screenshots/overview.png)
+</details>
+
+<details>
+  <summary>`/transactions`</summary>
+
+  ![overview](screenshots/transactions.png)
+</details>
+
+<details>
+  <summary>`/categories`</summary>
+
+  ![overview](screenshots/categories.png)
+</details>
+
+## Usage
+
+There is a Docker image ready at `thanhnguyen2187/sifintra`. Run it anywhere you
+want. Remember to mount `/data` to persist the data.
+
+```shell
+docker pull thanhnguyen2187/sifintra:latest
+
+docker run \
+    -p 3000:3000 \
+    -v /tmp/data:/data \
+    thanhnguyen2187/sifintra:latest \
+;
+```
+
+## Development
+
 Technical stack:
 
 - Moon: task runner and monorepo management
 - Rust + Axum: backend
 - SvelteKit + DaisyUI: frontend
-
-## Development
 
 ### Backend
 
